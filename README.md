@@ -22,9 +22,27 @@ moment its key is set — no code changes.
 Everything lives in **`.env`** at the repo root (`.env.example` is the template).
 Prisma reads `.env`, not `.env.local`, so keep them in the one file.
 
+**The database is Prisma Postgres.** It used to be a SQLite file, which was the
+right call for building this locally and cannot be deployed: a serverless
+filesystem is read-only apart from `/tmp` and is thrown away between requests, so
+every write — every sign-in token, every gift — would fail or vanish.
+
+```bash
+npx prisma postgres link --database <database-id>   # writes DATABASE_URL to .env
+npx prisma migrate deploy
+npx prisma db seed                                   # optional sample rows
+npx tsx scripts/verify-prisma.ts                     # prints ✅ Connected
+```
+
+Two things about Prisma 7 that surprise people coming from 6: `schema.prisma` no
+longer carries a `url` (the CLI reads it from `prisma.config.ts`, the app reads it
+through the `PrismaPg` adapter), and the client is generated into `generated/`
+in the repo rather than into `node_modules`. Both are why `prisma generate` has to
+run before a build — see the `postinstall` script.
+
 | Variable | Needed? | Without it |
 |---|---|---|
-| `DATABASE_URL` | yes | — (ships as `file:./dev.db`) |
+| `DATABASE_URL` | yes | — a Postgres connection string |
 | `AUTH_SECRET` | yes | generate with `npx auth secret` |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | no | falls back to Resend, then to the terminal |
 | `AUTH_RESEND_KEY` | no | sign-in links print to the terminal |

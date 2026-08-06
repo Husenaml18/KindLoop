@@ -155,7 +155,7 @@ export function Dropdown({
                otherwise shrink-to-fit inside the narrow trigger wrapper, and the
                nowrap rows would spill and force a horizontal scrollbar. */
             style={cssStyle(
-              "position:absolute;left:0;top:calc(100% + 6px);z-index:60;width:max-content;min-width:100%;max-width:min(320px,78vw);max-height:min(300px,52vh);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;margin:0;padding:6px;list-style:none;border-radius:10px;background:var(--paper);border:1px solid rgba(43,38,32,.18);box-shadow:0 22px 44px -20px rgba(30,20,12,.45);scrollbar-width:thin;scrollbar-color:rgba(43,38,32,.3) transparent"
+              "position:absolute;left:0;top:calc(100% + 6px);z-index:60;width:max-content;min-width:100%;max-width:min(320px,78vw);max-height:min(300px,52vh);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;margin:0;padding:6px;list-style:none;border-radius:10px;background:var(--paper);border:1px solid rgba(43,38,32,.18);box-shadow:0 22px 44px -20px rgba(30,20,12,.45)"
             )}
           >
             {items.map((o, i) => {

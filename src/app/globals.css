@@ -4,10 +4,69 @@ html {
   scroll-behavior: smooth;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-  }
+/* ------------------------------------------------------------------ */
+/* The scrollbar                                                       */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A thin bar in the product's own ink, everywhere something scrolls.
+ *
+ * Two traps, both of which this got wrong the first time and both of which look
+ * fine in devtools while doing nothing on screen:
+ *
+ * 1. `scrollbar-width` is NOT an inherited property. Setting it on `html` styles
+ *    the document bar and nothing else — every inner scroll area (the filter
+ *    dropdown on /templates, most obviously) keeps the browser default. It has to
+ *    go on `*`. Its sibling `scrollbar-color` *is* inherited, but they are set
+ *    together here so the two never drift apart.
+ *
+ * 2. Chromium does not resolve custom properties inside `::-webkit-scrollbar-*`
+ *    pseudo-elements. `background: var(--thumb)` parses, survives devtools, and
+ *    silently paints nothing — so the colours below are written literally. That is
+ *    the same value in two places on purpose: a variable would work in Firefox and
+ *    fail in Chrome, which is the worst of both. Change both if you change one.
+ *
+ * What it deliberately does not do:
+ *
+ * It never creates a scroll. Nothing here sets `overflow`, `height` or
+ * `scrollbar-gutter`, so an element that did not scroll before still does not, and
+ * no page gains a second bar or a reserved gutter it has no use for.
+ *
+ * And it never hides one. `::-webkit-scrollbar { display: none }` is the usual way
+ * this gets done and it is an accessibility failure: it removes the only thing
+ * telling somebody there is more below, and the only thing they can grab with a
+ * mouse. This is thin and quiet, not absent.
+ */
+
+/* Firefox, and Chromium 121+. On `*` because `scrollbar-width` does not inherit. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(58, 42, 24, 0.28) transparent;
+}
+
+/* Chromium and Safari, which style the parts individually and ignore the above. */
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  /* Literal, not a variable — see (2). */
+  background-color: rgba(58, 42, 24, 0.28);
+  border-radius: 999px;
+  /* A transparent border insets the thumb, so it reads as ~5px of ink resting in
+     a 9px lane rather than a bar wedged against the edge of the window. */
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(58, 42, 24, 0.46);
+}
+/* The little square where a vertical and a horizontal bar meet. */
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 @keyframes penWriting {

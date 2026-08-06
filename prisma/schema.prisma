@@ -1,10 +1,23 @@
 generator client {
-  provider = "prisma-client-js"
+  /*
+   * Prisma 7's generator. It emits real TypeScript into the repo rather than
+   * patching `node_modules/@prisma/client` in place, which is what makes the
+   * output survive a clean install and a bundler that does not expect a package
+   * to rewrite itself at generate time.
+   */
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  /*
+   * No `url` here, and that is not an omission.
+   *
+   * Prisma 7 removed it from the schema: the CLI takes its connection string from
+   * `prisma.config.ts`, and the client takes a driver adapter instead. One less
+   * place for a live credential to sit, and one less way for the two to disagree.
+   */
+  provider = "postgresql"
 }
 
 // --- Auth.js Prisma adapter contract ---

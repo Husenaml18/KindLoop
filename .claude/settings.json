@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.prisma.io)",
+      "Bash(node -e \"console.log\\('packageManager field:', require\\('./package.json'\\).packageManager ?? '\\(none\\)'\\)\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\);const all={...p.dependencies,...p.devDependencies};for\\(const k of ['prisma','@prisma/client','@prisma/adapter-pg','pg','dotenv','tsx','@types/pg','@types/node']\\)console.log\\(k.padEnd\\(22\\),all[k]??'MISSING'\\)\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\);const a={...p.dependencies,...p.devDependencies};console.log\\('prisma',a.prisma,'| client',a['@prisma/client'],'| adapter-pg',a['@prisma/adapter-pg']\\)\")",
+      "Bash(PRISMA_API_KEY=\"eyJraWQiOiJUa0hEN1ltOUNaQ2xESHYwazEyTEFhWjk4NTdGOE16dWxYTXJBMFpqbWVrIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJ3b3Jrc3BhY2U6cWd5MDY4bzdlanNpNjJ1cG40cjZtM2llIiwianRpIjoibnZtZnB4dGZmbnNvZG1iemE2cWJ6bGlwIiwiaWF0IjoxNzg2MDE5NTQ0OTcwfQ.TalM5MbL8epDyt6lghDyGFmOcXnEU-31KzFEQtOrb6dQEB4_YkO3N_G3pSWuJhE_R3_4cNkHajNzkXwHqt8MFQuVQ6m8_StrUkOJO0jcHrS6b12juvJ_xYOxFdJ1EDV8v4ibGa_L_duFY8oc3KzXz10OPxTEh72ZVqRVzuJP_ArbIvpd6Sjw4BveUcFST_LXO6scfEYzB_X7dUPb7j5nPfQH1rEPXWkV1zJ1UPa16-tizX4lbDgqdBIWoV7GBF4cieMH55B2ZK7VNEbOHDuh4_sBnp9oyA1YlShlGRPOb0t7pK-JVhjHcuQH-ZTbJT0WjW6wSmVGAz2HyCLsEvyoDg\" npx --yes --package=prisma@latest -- prisma postgres link --database \"db_qhgyjow57g5v9opiofuv6yq2\")",
+      "Bash(awk -F= '/^DATABASE_URL/{v=$2; gsub\\(/^[ \"'\"'\"']+/,\"\",v\\); split\\(v,a,\"://\"\\); print \"DATABASE_URL scheme: \" a[1] \"://\"}' .env)",
+      "Bash(awk -F= '/^DIRECT_DATABASE_URL/{v=$2; gsub\\(/^[ \"'\"'\"']+/,\"\",v\\); split\\(v,a,\"://\"\\); print \"DIRECT_DATABASE_URL scheme: \" a[1] \"://\"}' .env)",
+      "Bash(awk -F= '/^DATABASE_URL/{v=$2; print \"DATABASE_URL length: \" length\\(v\\) \" chars\"}' .env)",
+      "Bash(grep -c '^\\\\.env$')",
+      "Bash(npm uninstall *)",
+      "Bash(grep -v \"SECURITY WARNING\\\\|sslmode\\\\|libpq\\\\|trace-warnings\\\\|^$\\\\|next major\\\\|prepare for this\\\\|current behavior\\\\|postgresql.org\")",
+      "Bash(curl -s -o /dev/null -w \"/g/does-not-exist -> %{http_code} \\(404 = the database answered\\)\\\\n\" --max-time 20 http://localhost:3000/g/does-not-exist)",
+      "Bash(curl -s -o /dev/null -w \"/g/seed-love-letter -> %{http_code} \\(200 = a seeded row rendered\\)\\\\n\" --max-time 20 http://localhost:3000/g/seed-love-letter)",
+      "Bash(curl -s -o /dev/null -w \"/g/seed-win-you-back -> %{http_code}\\\\n\" --max-time 20 http://localhost:3000/g/seed-win-you-back)",
+      "Bash(curl -s -o /dev/null -w \"/g/does-not-exist    -> %{http_code}  \\(404 = the database answered\\)\\\\n\" --max-time 25 http://localhost:3000/g/does-not-exist)",
+      "Bash(curl -s -o /dev/null -w \"/g/seed-love-letter  -> %{http_code}  \\(200 = a seeded row rendered\\)\\\\n\" --max-time 25 http://localhost:3000/g/seed-love-letter)",
+      "Bash(curl -s -o /dev/null -w \"/g/seed-win-you-back -> %{http_code}\\\\n\" --max-time 25 http://localhost:3000/g/seed-win-you-back)",
+      "Bash(kill 269487)",
+      "Bash(grep -v \"^\\\\.env\\\\.example$\")",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

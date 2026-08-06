@@ -51,3 +51,6 @@ next-env.d.ts
 
 # stray dev output
 dev-server.log
+
+# Prisma 7 generates the client into the repo rather than into node_modules.
+/generated/
