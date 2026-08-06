@@ -23,6 +23,7 @@ import {
   SURFACES,
   SURFACE_IDS,
 } from "./theme";
+import { SquareCropper } from "@/app/SquareCropper";
 import { MemoryPuzzleView } from "./View";
 
 /* The workbench is the table the puzzle is made on: warm wood and daylight, so
@@ -109,6 +110,8 @@ export function MemoryPuzzleEditor({
   const [selectedMilestone, setSelectedMilestone] = useState(0);
   const [previewKey, setPreviewKey] = useState(0);
   const [busy, setBusy] = useState(false);
+  /* The picture waiting to have its square chosen. */
+  const [cropping, setCropping] = useState<File | null>(null);
   const pictureRef = useRef<HTMLInputElement>(null);
   const rewardRef = useRef<HTMLInputElement>(null);
 
@@ -196,13 +199,25 @@ export function MemoryPuzzleEditor({
         type="file"
         accept="image/*"
         className="sr-only"
-        onChange={async (e) => {
+        onChange={(e) => {
           const f = e.target.files?.[0];
-          if (!f) return;
-          await upload(f, (url) => patch({ imageUrl: url }));
           if (pictureRef.current) pictureRef.current.value = "";
+          /* Straight to the cropper — the board is square, so the square is
+             chosen deliberately rather than guessed at by the renderer. */
+          if (f) setCropping(f);
         }}
       />
+
+      {cropping && (
+        <SquareCropper
+          file={cropping}
+          onCancel={() => setCropping(null)}
+          onDone={async (square) => {
+            setCropping(null);
+            await upload(square, (url) => patch({ imageUrl: url }));
+          }}
+        />
+      )}
       <input
         ref={rewardRef}
         type="file"
@@ -264,6 +279,11 @@ export function MemoryPuzzleEditor({
                     {busy && <span className="self-center" style={{ ...label, fontSize: 8.5 }}>uploading…</span>}
                   </div>
                 </div>
+
+                <p className="m-0 text-[11px]" style={{ color: SOFT }}>
+                  You&apos;ll pick the square yourself — a puzzle board is square, so
+                  this is how you decide which part of the photo gets cut up.
+                </p>
 
                 <label className="block">
                   <span className="mb-1.5 block" style={label}>Or paste a link</span>

@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/session";
 import { getTemplate, isTemplateId } from "@/lib/templates/registry";
 import { generateSlug } from "@/lib/slug";
 import { CreateEditorClient } from "./CreateEditorClient";
+import { AccountMenu } from "@/app/AccountMenu";
 
 export default async function CreateTemplatePage(
   props: PageProps<"/create/[template]">
@@ -52,6 +53,7 @@ export default async function CreateTemplatePage(
       unlocked={gift.unlocked}
       priceCents={def.priceCents}
       initialContent={initialContent}
+      accountMenu={<AccountMenu />}
     />
   );
 }

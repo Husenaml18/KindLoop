@@ -383,8 +383,17 @@ function FloatingMemory({
 }) {
   const reduced = useReducedMotion();
 
+  /*
+   * Still while you are pointing at it.
+   *
+   * These drift on an infinite loop, and a drifting object under a stationary
+   * cursor crosses its own edge over and over — every crossing is another
+   * mouseenter/mouseleave pair, which is what made the tooltip strobe. Settling
+   * on hover fixes the flicker and is the better behaviour anyway: you reach for
+   * something and it stops moving.
+   */
   const floatAnim =
-    emerged && !reduced
+    emerged && !reduced && !hovered
       ? {
           y: [0, -memory.float.y, 0],
           rotate: [memory.rotate, memory.rotate + memory.float.rot, memory.rotate],
@@ -392,7 +401,15 @@ function FloatingMemory({
       : { y: 0, rotate: memory.rotate };
 
   return (
+    /*
+     * The hover is decided here, on the one box in this stack that does not
+     * animate. Everything inside it floats, springs and scales; asking a moving,
+     * resizing target whether the pointer is inside it is asking a question whose
+     * answer changes sixty times a second.
+     */
     <div
+      onPointerEnter={() => onHover(memory.id)}
+      onPointerLeave={() => onHover(null)}
       style={{
         ...cssStyle(`position:absolute;${memory.place}`),
         zIndex: hovered ? 15 : 5,
@@ -418,8 +435,6 @@ function FloatingMemory({
         <motion.div animate={floatAnim} transition={{ duration: memory.float.dur, repeat: Infinity, ease: "easeInOut", delay: memory.float.delay }}>
           <Link
             href={memory.href}
-            onMouseEnter={() => onHover(memory.id)}
-            onMouseLeave={() => onHover(null)}
             onFocus={() => onHover(memory.id)}
             onBlur={() => onHover(null)}
             aria-label={`${memory.name} template`}
@@ -446,14 +461,22 @@ function FloatingMemory({
   );
 }
 
-/** The settled form, living in the Templates grid — same layoutId, so it is the same object. */
+/**
+ * The settled form, living in the Templates grid.
+ *
+ * It used to carry the hero prop's `layoutId`, on the theory that the same object
+ * flies down the page and lands here. In practice the two are a whole viewport
+ * apart: by the time the grid mounts, its counterpart has scrolled away, so there
+ * is nothing to morph *from* and Framer simply drops each card into place. That
+ * pop is what the section looked like on the way in. It fades and focuses now
+ * instead — see `AssembledMemories`.
+ */
 function MemoryCard({ memory, photos }: { memory: HeroMemory; photos: string[] }) {
   return (
     <Link href={memory.href} style={{ display: "block", height: "100%" }}>
       <motion.div
-        layoutId={`memory-${memory.id}`}
-        transition={MORPH_SPRING}
         whileHover={{ y: -5 }}
+        transition={MORPH_SPRING}
         style={{
           borderRadius: 12,
           overflow: "hidden",
@@ -579,7 +602,7 @@ export function HeroStage({
         animate={{ opacity: emerged && !assembled ? 1 : 0 }}
         transition={{ duration: 0.8, delay: emerged ? 1.1 : 0 }}
         style={cssStyle(
-          "position:absolute;left:28%;top:-2%;font-family:var(--font-gochi),cursive;font-size:22px;color:var(--khaki);transform:rotate(-3deg)"
+          "position:absolute;left:28%;top:-10%;font-family:var(--font-gochi),cursive;font-size:22px;color:var(--khaki);transform:rotate(-3deg)"
         )}
       >
         made in one evening ↘
@@ -588,25 +611,50 @@ export function HeroStage({
   );
 }
 
-export function AssembledMemories({
-  photos,
-  assembled,
-}: {
-  photos: string[];
-  assembled: boolean;
-}) {
+/**
+ * The Templates grid, coming into focus.
+ *
+ * This used to be gated on a single boolean: cross a scroll threshold and every
+ * card mounted at once, which is exactly the jump it looked like. The cards are
+ * always in the document now, and each one develops in place as it comes into
+ * view — out of focus and slightly small, then sharp and settled, one after
+ * another down the grid.
+ *
+ * Blur rather than a plain fade because of what these are. Every card is a
+ * photograph, and a photograph arriving is a photograph coming into focus; the
+ * page is already full of paper and ink and this is the one thing on it that
+ * behaves like a lens.
+ */
+export function AssembledMemories({ photos }: { photos: string[] }) {
+  const reduced = useReducedMotion();
+
   return (
     <div
       style={cssStyle(
         "display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:18px"
       )}
     >
-      {HERO_MEMORIES.map((m) => (
-        // Each slot keeps its footprint whether or not the object has arrived,
-        // so nothing below jumps while the memories are still in flight.
-        <div key={m.id} style={{ minHeight: 360 }}>
-          {assembled && <MemoryCard memory={m} photos={photos} />}
-        </div>
+      {HERO_MEMORIES.map((m, i) => (
+        <motion.div
+          key={m.id}
+          style={{ minHeight: 360 }}
+          initial={reduced ? { opacity: 0 } : { opacity: 0, y: 26, scale: 0.97, filter: "blur(9px)" }}
+          whileInView={
+            reduced ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
+          }
+          /* Once, and off a small sliver of the card: re-running every time the
+             grid passes the fold would turn a first impression into a tic, and
+             waiting for the whole card means the last row never fires on a short
+             screen. */
+          viewport={{ once: true, amount: 0.15, margin: "0px 0px -40px 0px" }}
+          transition={{
+            duration: reduced ? 0.25 : 0.72,
+            delay: reduced ? 0 : (i % 4) * 0.09,
+            ease: [0.2, 0.8, 0.2, 1],
+          }}
+        >
+          <MemoryCard memory={m} photos={photos} />
+        </motion.div>
       ))}
     </div>
   );

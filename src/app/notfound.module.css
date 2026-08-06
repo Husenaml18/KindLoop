@@ -1,0 +1,626 @@
+/*
+ * The desk at the end of an afternoon.
+ *
+ * Everything here is warm, low-contrast and slightly off-square. No hard edges, no
+ * grey, nothing that could be mistaken for a system message — the page has to read
+ * as a place rather than as a status code.
+ */
+
+.scene {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  color: var(--ink-muted);
+  background:
+    radial-gradient(ellipse 70% 46% at 50% 0%, rgba(255, 224, 158, 0.55), transparent 66%),
+    radial-gradient(ellipse 46% 40% at 12% 74%, rgba(206, 138, 82, 0.2), transparent 70%),
+    radial-gradient(ellipse 44% 38% at 90% 62%, rgba(226, 168, 104, 0.22), transparent 70%),
+    linear-gradient(180deg, #f6e7c8 0%, #efdcbb 42%, #e6cfa8 100%);
+}
+
+/* Ambience sits above the ground and below everything readable. */
+.air {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---------- fairy lights ---------- */
+
+/*
+ * Hung under the header, not through it.
+ *
+ * Strung across the whole viewport the wire ran straight through the navigation
+ * pill, where it stopped being a string of lights and became a stray hairline
+ * across the chrome.
+ */
+.lights {
+  position: relative;
+  z-index: 1;
+  height: 76px;
+  margin-bottom: -34px;
+  pointer-events: none;
+}
+.lightsWire {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.bulb {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #fff4d0, #f0b95e 60%, #d99b3c);
+  box-shadow: 0 0 10px 3px rgba(255, 206, 128, 0.55), 0 0 22px 8px rgba(255, 196, 110, 0.28);
+}
+
+/* ---------- the centre column ---------- */
+
+.stage {
+  position: relative;
+  z-index: 3;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  /* Well clear of the bar: the numerals are tall, and the topmost one used to sit
+     inside the header's blur. */
+  padding: 56px 28px 72px;
+}
+
+/* ---------- 404 ---------- */
+
+.numerals {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3vw, 40px);
+  margin-bottom: 46px;
+}
+.digit {
+  --h: clamp(112px, 15vw, 190px);
+  height: var(--h);
+  display: grid;
+  place-items: center;
+}
+
+/* Each 4 is three laid strips inside a box the height of the digit. */
+.four {
+  position: relative;
+  height: var(--h);
+  width: calc(var(--h) * 0.74);
+}
+.stroke {
+  position: absolute;
+  display: block;
+}
+
+/*
+ * The paper the numerals are cut from.
+ *
+ * Deliberately a step lighter than the page and edged with a thin line. At the
+ * page's own cream the shapes were legible in a screenshot and invisible on a
+ * bright screen — a "404" that has to be looked for is not a 404.
+ */
+.paperFace {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: linear-gradient(160deg, #fffdf6, #f0e2c1);
+  box-shadow:
+    0 20px 34px -16px rgba(74, 44, 14, 0.65),
+    0 0 0 1px rgba(108, 76, 34, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+/* The picture inside a polaroid: even margins, and a deeper one at the foot. */
+.photoInset {
+  position: absolute;
+  inset: 9% 15% 24%;
+  border-radius: 1.5px;
+  box-shadow: inset 0 0 0 1px rgba(58, 36, 14, 0.18);
+}
+/* The right-hand 4 is written on rather than photographed. */
+.ruled {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 8px, rgba(122, 92, 52, 0.3) 8px 9px),
+    linear-gradient(160deg, #fffdf6, #f0e2c1);
+}
+
+/* Thicker strokes than a typeface would use — these are objects, and a thin one
+   reads as a stick rather than as a photograph. */
+.fourDiagonal {
+  left: 2%;
+  top: -2%;
+  width: 25%;
+  height: 78%;
+  transform: rotate(21deg);
+  transform-origin: 50% 100%;
+}
+.fourBar {
+  left: 0;
+  top: 58%;
+  width: 100%;
+  height: 21%;
+}
+.fourStem {
+  right: 7%;
+  top: -2%;
+  width: 25%;
+  height: 102%;
+}
+
+.pin {
+  position: absolute;
+  z-index: 2;
+  transform: rotate(-11deg);
+  filter: drop-shadow(0 12px 20px rgba(74, 44, 14, 0.35));
+}
+
+.scribble {
+  position: absolute;
+  right: -14%;
+  bottom: -10%;
+  font-family: var(--font-gochi), cursive;
+  font-size: clamp(13px, 1.4vw, 17px);
+  color: var(--rust);
+  transform: rotate(-7deg);
+  opacity: 0.85;
+}
+
+/* ---------- the 0, which is the envelope ---------- */
+
+.zeroWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.zero {
+  position: relative;
+  height: var(--h);
+  width: calc(var(--h) * 1.02);
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.zero:hover { transform: translateY(-4px); }
+.zero:focus-visible {
+  outline: 2px solid var(--rust);
+  outline-offset: 8px;
+  border-radius: 12px;
+}
+
+/*
+ * Four flat layers, stacked with z-index.
+ *
+ * A 3D fold is the obvious way to draw this and the wrong one: `rotateX(180deg)`
+ * inside a perspective sorts the flap ahead of the note at some viewport widths and
+ * behind it at others, depending on how the browser resolves the 3D sort. Paint
+ * order never changes its mind.
+ */
+.zeroFlap {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 14%;
+  height: 46%;
+  background: linear-gradient(168deg, #fffdf6, #eeddb8);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  box-shadow: 0 0 0 1px rgba(108, 76, 34, 0.16);
+  filter: drop-shadow(0 6px 10px rgba(90, 58, 22, 0.16));
+}
+
+.zeroBack {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 14%;
+  bottom: 4%;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #e3cfa4, #d8c193);
+  box-shadow: 0 0 0 1px rgba(108, 76, 34, 0.2);
+}
+
+/* The note that stayed behind. It rides up out of the pocket when the seal goes. */
+.zeroNote {
+  position: absolute;
+  z-index: 2;
+  left: 10%;
+  right: 10%;
+  top: 17%;
+  bottom: 12%;
+  border-radius: 3px;
+  background: linear-gradient(170deg, #fffefa, #f8f0dd);
+  box-shadow: 0 -8px 18px -10px rgba(74, 44, 14, 0.45), 0 0 0 1px rgba(108, 76, 34, 0.14);
+  padding: 14% 14% 0;
+}
+.zeroNoteLines {
+  display: block;
+  height: 40%;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(122, 92, 52, 0.28) 0 1.5px,
+    transparent 1.5px 9px
+  );
+}
+
+.zeroFront {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 4%;
+  height: 54%;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(178deg, #f7e9ca, #ecd9b1);
+  clip-path: polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%);
+  box-shadow: 0 24px 40px -22px rgba(74, 44, 14, 0.7);
+}
+
+.zeroSeal {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 56%;
+  transform: translate(-50%, -50%);
+  display: block;
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: -30px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--label-on-paper);
+  opacity: 0.75;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+.zero:hover + .hint {
+  color: var(--rust);
+  opacity: 1;
+}
+
+/* ---------- words ---------- */
+
+.whisper {
+  margin: 8px 0 0;
+  font-family: var(--font-gochi), cursive;
+  font-size: clamp(18px, 2.1vw, 24px);
+  line-height: 1.5;
+  color: #7a5433;
+  transform: rotate(-0.8deg);
+}
+
+.headline {
+  margin: 30px 0 0;
+  font-family: var(--font-fraunces), serif;
+  font-weight: 500;
+  font-size: clamp(28px, 3.6vw, 46px);
+  line-height: 1.08;
+  letter-spacing: -0.016em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.sub {
+  margin: 18px 0 0;
+  max-width: 420px;
+  font-size: clamp(15px, 1.4vw, 17px);
+  line-height: 1.72;
+  color: var(--ink-muted);
+}
+
+/* ---------- the note that unfolds ---------- */
+
+.unfolded {
+  overflow: hidden;
+  width: min(460px, 92vw);
+}
+.unfoldedInner {
+  margin-top: 24px;
+  padding: 26px 26px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(122, 92, 52, 0.2);
+  box-shadow: 0 30px 60px -34px rgba(74, 44, 14, 0.75);
+  /* the paper, and the crease it was folded along */
+  background-image: linear-gradient(170deg, #fffdf6, #f6ecd6),
+    linear-gradient(to bottom, transparent 49.6%, rgba(122, 92, 52, 0.16) 50%, transparent 50.4%);
+}
+.unfoldedLine {
+  margin: 0;
+  font-family: var(--font-gochi), cursive;
+  font-size: clamp(19px, 2.2vw, 24px);
+  line-height: 1.45;
+  color: #5c4025;
+}
+.unfoldedHeart {
+  margin: 12px 0 0;
+  font-size: 24px;
+}
+.unfoldedAsk {
+  margin: 10px auto 0;
+  max-width: 300px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
+/* ---------- calls to action ---------- */
+
+/*
+ * One shape, three weights.
+ *
+ * They used to be three unrelated objects — a filled pill, an outlined pill and a
+ * bare underlined link — at three different heights with an emoji in front of each.
+ * Same height, same radius, same icon size, and the difference between them becomes
+ * weight rather than shape.
+ */
+.ctas {
+  margin-top: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.cta,
+.ctaQuiet {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 50px;
+  padding: 0 24px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.24s ease,
+    background-color 0.24s ease, border-color 0.24s ease, color 0.24s ease;
+}
+.cta:hover,
+.ctaQuiet:hover { transform: translateY(-2px); }
+
+.ctaPrimary {
+  background: linear-gradient(180deg, #4a3418, var(--brass));
+  color: var(--on-dark);
+  box-shadow: 0 12px 26px -14px rgba(46, 30, 14, 0.9), inset 0 1px 0 rgba(255, 236, 190, 0.18);
+}
+.ctaPrimary:hover {
+  box-shadow: 0 20px 34px -14px rgba(46, 30, 14, 0.95), inset 0 1px 0 rgba(255, 236, 190, 0.22);
+}
+
+.ctaSecondary {
+  background: rgba(255, 253, 246, 0.86);
+  color: var(--ink);
+  border: 1px solid rgba(122, 92, 52, 0.26);
+  box-shadow: 0 8px 20px -14px rgba(74, 44, 14, 0.6);
+}
+.ctaSecondary:hover {
+  border-color: rgba(181, 80, 46, 0.55);
+  color: var(--rust);
+  box-shadow: 0 14px 26px -14px rgba(74, 44, 14, 0.65);
+}
+
+/* The third is the same object with everything taken away but the words. */
+.ctaQuiet {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--ink-faint);
+}
+.ctaQuiet:hover {
+  color: var(--rust);
+  background: rgba(181, 80, 46, 0.07);
+  border-color: rgba(181, 80, 46, 0.18);
+}
+
+/* ---------- the shelf ---------- */
+
+.shelfSection {
+  position: relative;
+  z-index: 3;
+  padding: 30px 28px 66px;
+  text-align: center;
+}
+.shelfHead { max-width: 520px; margin: 0 auto 40px; }
+.shelfLabel {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--label-on-paper);
+}
+.shelfTitle {
+  margin: 12px 0 0;
+  font-family: var(--font-fraunces), serif;
+  font-weight: 500;
+  font-size: clamp(24px, 2.8vw, 34px);
+  line-height: 1.14;
+  color: var(--ink);
+}
+.shelfSub {
+  margin: 10px 0 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.shelfWrap {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/*
+ * Four to a shelf, and the shelf is drawn by the grid itself.
+ *
+ * The plank is a repeating gradient keyed to a fixed row height rather than an
+ * element under each row, so it stays exactly under whatever the grid does at any
+ * width — two rows of four here, four rows of two on a phone — without the markup
+ * having to know how many rows there are.
+ */
+.shelf {
+  --row: 200px;
+  --plank: 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: var(--row);
+  /* Start, not end. Each keepsake is exactly `--row - --plank` tall, so aligned to
+     the top of its row it comes to rest on the plank; aligned to the bottom it hung
+     down through the wood and the labels sat on the grain. */
+  align-items: start;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(var(--row) - var(--plank)),
+    #c1935c calc(var(--row) - var(--plank)) calc(var(--row) - var(--plank) + 3px),
+    #a5763f calc(var(--row) - var(--plank) + 3px) calc(var(--row) - 6px),
+    #7d5429 calc(var(--row) - 6px) var(--row)
+  );
+  filter: drop-shadow(0 14px 22px rgba(60, 34, 10, 0.28));
+}
+.shelfItem { display: flex; justify-content: center; }
+
+.keepsake {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  width: 100%;
+  height: calc(var(--row) - var(--plank));
+  padding-bottom: 4px;
+  text-decoration: none;
+}
+.keepsakeArt {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-height: 0;
+  /* Objects stand on the plank, so the shadow belongs directly under them. */
+  filter: drop-shadow(0 10px 10px rgba(88, 56, 22, 0.26));
+  transition: filter 0.3s ease;
+}
+.keepsake:hover .keepsakeArt { filter: drop-shadow(0 20px 16px rgba(88, 56, 22, 0.32)); }
+.keepsakeLabel {
+  font-family: var(--font-gochi), cursive;
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.2;
+  text-align: center;
+}
+
+/*
+ * The experience each keepsake opens, on a paper tag above the object.
+ *
+ * It used to sit under the label, which put rust ink on dark wood — invisible at
+ * exactly the moment somebody was looking for it. Above the object it has the page
+ * behind it, and a card of its own besides.
+ */
+.keepsakeNote {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 6px);
+  padding: 6px 13px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: var(--paper);
+  border: 1px solid rgba(122, 92, 52, 0.24);
+  box-shadow: 0 8px 18px -8px rgba(74, 44, 14, 0.55);
+  /* Set in the body face at a readable size. As 8.5px letterspaced monospace it
+     was a texture that happened to be words. */
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--rust);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.keepsake:hover .keepsakeNote,
+.keepsake:focus-visible .keepsakeNote {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.shelfFoot {
+  margin: 34px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-gochi), cursive;
+  font-size: 16px;
+  color: var(--ink-faint);
+}
+
+/* ---------- sound ---------- */
+
+.soundToggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(122, 92, 52, 0.24);
+  background: rgba(253, 250, 241, 0.82);
+  backdrop-filter: blur(8px);
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.soundToggle:hover { color: var(--rust); border-color: var(--rust); }
+.soundDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(122, 92, 52, 0.35);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.soundDotOn {
+  background: var(--rust);
+  box-shadow: 0 0 0 3px rgba(181, 80, 46, 0.18);
+}
+
+/* ---------- smaller screens ---------- */
+
+@media (max-width: 620px) {
+  .lights { height: 56px; margin-bottom: -26px; }
+  .numerals { gap: 12px; margin-bottom: 40px; }
+  .digit { --h: clamp(84px, 24vw, 116px); }
+  .stage { padding: 34px 22px 52px; }
+  .pin { display: none; }
+  .shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); --row: 168px; }
+  .keepsakeArt { transform: scale(0.84); }
+  .cta,
+  .ctaQuiet { height: 46px; padding: 0 18px; font-size: 13.5px; }
+}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { TemplatesGallery } from "./TemplatesGallery";
+import { AccountMenu, isSignedIn } from "@/app/AccountMenu";
 import { getGiftPhotos } from "@/lib/giftPhotos";
 import { TEMPLATE_CATALOG } from "@/lib/templateCatalog";
 
@@ -10,6 +11,6 @@ export const metadata: Metadata = {
 };
 
 export default async function TemplatesPage() {
-  const photos = await getGiftPhotos(TEMPLATE_CATALOG.length);
-  return <TemplatesGallery photos={photos} />;
+  const [photos, signedIn] = await Promise.all([getGiftPhotos(TEMPLATE_CATALOG.length), isSignedIn()]);
+  return <TemplatesGallery photos={photos} accountMenu={<AccountMenu />} signedIn={signedIn} />;
 }

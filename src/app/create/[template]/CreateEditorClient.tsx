@@ -16,6 +16,7 @@ export function CreateEditorClient({
   unlocked,
   priceCents,
   initialContent,
+  accountMenu,
 }: {
   templateId: TemplateId;
   giftId: string;
@@ -25,6 +26,8 @@ export function CreateEditorClient({
   priceCents?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- matches the resolved template's content type
   initialContent: any;
+  /* Rendered on the server, since it reads the session. */
+  accountMenu?: React.ReactNode;
 }) {
   const router = useRouter();
   const def = getTemplate(templateId)!;
@@ -86,7 +89,12 @@ export function CreateEditorClient({
         /* The same layered paper as the rest of the product — the editor used to
            be the one screen that looked like a different application. */
         background:
-          "linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 22%, var(--bg0) 48%, var(--bg2) 74%, var(--bg1) 100%)",
+          "radial-gradient(circle at 18% 26%, rgba(122,92,52,.07) .7px, transparent 1px), " +
+          "radial-gradient(circle at 72% 64%, rgba(122,92,52,.055) .6px, transparent .9px), " +
+          "radial-gradient(ellipse 92% 48% at 50% -6%, rgba(226,186,124,.34), transparent 62%), " +
+          "radial-gradient(ellipse 60% 38% at 92% 22%, rgba(190,104,64,.12), transparent 66%), " +
+          "linear-gradient(180deg, var(--bg2) 0%, var(--bg0) 32%, var(--bg1) 66%, var(--bg0) 100%)",
+        backgroundSize: "39px 43px, 57px 51px, auto, auto, auto",
         color: "var(--ink-muted)",
         fontFamily: "var(--font-space-grotesk), system-ui, sans-serif",
         /* Said explicitly: this is a tool, and it keeps the system pointer no
@@ -102,7 +110,8 @@ export function CreateEditorClient({
         }
       >
         <div className="flex flex-col gap-6">
-          <div>
+          <div className="flex items-start justify-between gap-4">
+            <div>
             <h1
               className="m-0"
               style={{
@@ -119,6 +128,8 @@ export function CreateEditorClient({
             <p className="m-0 mt-2 max-w-xl" style={{ fontSize: 14, lineHeight: 1.6, color: "var(--ink-muted)" }}>
               {def.description}
             </p>
+            </div>
+            {accountMenu}
           </div>
 
           <Editor value={content} onChange={setContent} uploadPhoto={handleUpload} />

@@ -10,47 +10,107 @@
  * Anything in here must be a token. Behaviour belongs to the page that wants it.
  */
 .themeRoot {
-  /* Pure coffee palette: milk-latte paper, espresso-brown accents, caramel
-     highlights, cinnamon-rust for contrast. No green anywhere. */
-  --bg0: #e8d9bd;
-  --bg1: #e2cea8;
-  --bg2: #dcc599;
-  --deep: #3d2517;
-  --deep2: #24140b;
+  /*
+   * Vintage paper: a warm kraft table, with bright deckled cream laid on it.
+   *
+   * The ground is deliberately *mid-toned* rather than pale. An earlier version
+   * washed everything out to near-cream, which flattened the whole thing — cards
+   * and page became the same value and nothing read as a sheet resting on
+   * anything. The contrast between the kraft and the paper is what makes it look
+   * handmade rather than printed.
+   *
+   * Every ink here has been measured against the kraft, not against the paper:
+   * `--ink` 7.6:1, `--ink-muted` 4.6:1, `--ink-faint` 4.3:1, `--rust` 4.2:1.
+   */
 
-  --paper: #f2e9d4;
-  --paper-muted: #e6d4ae;
+  /*
+   * The page *is* the sheet.
+   *
+   * An earlier pass made the ground mid-brown kraft with cream cards on top. On a
+   * page this text-heavy that reads as mud — the reference image is dominated by
+   * the pale handmade sheet, and the kraft only shows at its torn edges. So the
+   * ground is that sheet, the kraft survives as an accent, and cards are a shade
+   * brighter with a real shadow to lift them.
+   *
+   * Inks are measured against the page: `--ink` 12.1:1, `--ink-muted` 7.4:1,
+   * `--ink-faint` 5.6:1, `--rust` 6.7:1 — all comfortably AA.
+   */
 
-  --ink: #2b2013;
-  --ink-muted: #6b5642;
-  --ink-faint: #8f7a63;
+  /* the sheet */
+  --bg0: #efe6d2;
+  --bg1: #e9dec6;
+  --bg2: #f4ecdb;
+  --deep: #3a2a18;
+  --deep2: #241609;
+
+  /* cards, a shade brighter than the sheet */
+  --paper: #fdfaf1;
+  --paper-muted: #f0e7d3;
+
+  --ink: #33240f;
+  --ink-muted: #584431;
+  --ink-faint: #6a5740;
   --label-on-paper: #7a5c3e;
 
-  --cream: #3d2517;
-  --cream-muted: #6b5642;
-  --cream-faint: #8f7a63;
+  --cream: #33240f;
+  --cream-muted: #584431;
+  --cream-faint: #6a5740;
   --label-on-dark: #7a5c3e;
 
-  /* For content sitting on an intentionally dark local surface (--deep,
-     --deep2, --brass) — distinct from --cream, which is dark ink text
-     for the light page background. */
-  --on-dark: #f2e9d4;
-  --on-dark-muted: #d6c4a4;
+  --on-dark: #fdfaf1;
+  --on-dark-muted: #e2d5b8;
 
-  --brass: #3d2517;
-  --brass-hover: #24140b;
-  --brass-bright: #d9a45c;
+  --brass: #3a2a18;
+  --brass-hover: #241609;
+  --brass-bright: #c9922f;
 
-  --rust: #b5502e;
-  --rust-hover: #8a3a1e;
-  --rust-light: #d98a68;
+  --rust: #8a3116;
+  --rust-hover: #6b2410;
+  --rust-light: #c4623c;
 
-  --khaki: #6b5540;
-  --khaki-light: #d4c3a3;
-  --khaki-pale: #ecdfc4;
+  --khaki: #6a5740;
+  --khaki-light: #d8c6a4;
+  --khaki-pale: #ece0c6;
 
-  --tan: #d9c4a0;
-  --tan-deep: #b89b6e;
+  /* the kraft, now an accent rather than the ground */
+  --tan: #c9b394;
+  --tan-deep: #a88f68;
 
-  --shadow-hard: rgba(30, 20, 12, 0.4);
+  --shadow-hard: rgba(58, 40, 18, 0.34);
+}
+
+/*
+ * Handmade paper, as a surface.
+ *
+ * Two things separate real paper from a beige rectangle: the flecks of pulp
+ * caught in it, and the fact that its edge is never straight. Both are drawn —
+ * the speckle from a few tiny repeating gradients, the deckle from a soft mask.
+ */
+.paperSheet {
+  position: relative;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 17% 23%, rgba(120, 96, 60, 0.12) 0.6px, transparent 0.9px),
+    radial-gradient(circle at 63% 71%, rgba(120, 96, 60, 0.1) 0.5px, transparent 0.8px),
+    radial-gradient(circle at 84% 37%, rgba(120, 96, 60, 0.09) 0.7px, transparent 1px),
+    radial-gradient(circle at 41% 88%, rgba(120, 96, 60, 0.08) 0.5px, transparent 0.8px);
+  background-size: 37px 41px, 53px 47px, 61px 59px, 43px 67px;
+  box-shadow: 0 18px 40px -26px var(--shadow-hard), 0 2px 0 rgba(255, 253, 246, 0.5) inset;
+}
+
+/* The torn lower edge of a sheet, for panels that should look pulled from a pad. */
+.tornBottom::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 12px;
+  background: inherit;
+  -webkit-mask-image: radial-gradient(circle at 6px 0, transparent 5.4px, #000 5.6px);
+  mask-image: radial-gradient(circle at 6px 0, transparent 5.4px, #000 5.6px);
+  -webkit-mask-size: 13px 12px;
+  mask-size: 13px 12px;
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
 }

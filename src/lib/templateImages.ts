@@ -10,6 +10,7 @@ import mothersDayLetter from "@/images/mothers-day.png";
 import personalizedSong from "@/images/personalized-song.png";
 import surpriseRevealBox from "@/images/surprise-reveal.png";
 import treasureHunt from "@/images/treasure-hunt.png";
+import winYouBack from "@/images/win-you-back.png";
 
 /**
  * The artwork for each experience.
@@ -37,6 +38,7 @@ export const TEMPLATE_IMAGES: Record<string, StaticImageData> = {
   "personalized-song": personalizedSong,
   "surprise-reveal-box": surpriseRevealBox,
   "treasure-hunt": treasureHunt,
+  "win-you-back": winYouBack,
 };
 
 export function templateImage(id: string): StaticImageData | undefined {

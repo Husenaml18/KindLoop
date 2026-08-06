@@ -5,6 +5,8 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { deliverMagicLink } from "@/lib/mail";
+import { readSignupProfile } from "@/lib/signupProfile";
+import { generateCode } from "@/lib/verificationCode";
 
 export const hasGoogleAuth = Boolean(
   process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
@@ -32,16 +34,28 @@ const emailProvider = {
   /* Compared as stored, so addresses are lowercased and trimmed on the way in —
      otherwise "Ann@x.com" and "ann@x.com" become two separate accounts. */
   normalizeIdentifier: (identifier: string) => identifier.trim().toLowerCase(),
+  /*
+   * The token is the code.
+   *
+   * Auth.js keeps one token per address, so rather than inventing a second secret
+   * and somewhere to store it, the six characters printed in the email *are* the
+   * token in the link. Click the button or type them in and the same row is spent
+   * either way — one thing to expire, one thing to invalidate, no second path that
+   * could disagree with the first.
+   */
+  generateVerificationToken: () => generateCode(),
   sendVerificationRequest: async ({
     identifier,
     url,
+    token,
     expires,
   }: {
     identifier: string;
     url: string;
+    token: string;
     expires: Date;
   }) => {
-    await deliverMagicLink({ to: identifier, url, expires });
+    await deliverMagicLink({ to: identifier, url, code: token, expires });
   },
 } satisfies Provider;
 
@@ -85,6 +99,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/sign-in",
     verifyRequest: "/sign-in/check-your-email",
     error: "/sign-in/problem",
+  },
+  events: {
+    /*
+     * The sign-up form's answers, applied at the only moment the account exists
+     * to receive them.
+     *
+     * Auth.js creates the row when the emailed link is opened, which can be a
+     * different device and an hour after the form was filled in — so the name
+     * travels in a short-lived cookie and lands here. An event rather than a
+     * callback because nothing about sign-in should depend on this working: if
+     * the cookie is gone, the account is still made, just without a name on it.
+     */
+    async createUser({ user }) {
+      const profile = await readSignupProfile();
+      if (!profile) return;
+
+      const data: { name?: string; gender?: string } = {};
+      if (profile.name && !user.name) data.name = profile.name;
+      if (profile.gender) data.gender = profile.gender;
+      if (Object.keys(data).length === 0) return;
+
+      try {
+        await prisma.user.update({ where: { id: user.id }, data });
+      } catch {
+        /* Never let a nicety break the only way into the product. */
+      }
+    },
   },
   callbacks: {
     async jwt({ token, user, trigger, session }) {

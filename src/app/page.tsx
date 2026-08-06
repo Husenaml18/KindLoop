@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import LandingPage from "./LandingPage";
 import { getGiftPhotos } from "@/lib/giftPhotos";
+import { AccountMenu, isSignedIn } from "./AccountMenu";
 
 export const metadata: Metadata = {
   title: "Kindloop — Turn feelings into something they'll keep forever",
@@ -9,6 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const photos = await getGiftPhotos(24);
-  return <LandingPage photos={photos} />;
+  const [photos, signedIn] = await Promise.all([getGiftPhotos(24), isSignedIn()]);
+  return <LandingPage photos={photos} accountMenu={<AccountMenu />} signedIn={signedIn} />;
 }

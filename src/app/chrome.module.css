@@ -1,0 +1,679 @@
+/*
+ * The header and footer.
+ *
+ * The product is made of stationery, so the chrome is too: the header's lower edge
+ * is punched like the edge of a postage stamp, and the footer's upper edge is torn
+ * like a sheet pulled from a pad. Both are drawn in CSS — no images, nothing to
+ * load, and they scale to any width.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Header                                                              */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The bar is the page.
+ *
+ * No fill of its own at rest and no rule beneath it — a header that is a slightly
+ * different cream from the page it sits on reads as a seam, and a hairline under
+ * it cuts the sheet in two. Once the page has actually moved it fades in the
+ * faintest wash of its own so the words underneath don't collide with it.
+ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: transparent;
+  transition: padding 0.3s ease, background-color 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+.headerScrolled {
+  background: color-mix(in srgb, var(--bg0) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(1.06);
+}
+
+.headerInner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+  transition: padding 0.28s ease;
+}
+.headerLeft { justify-self: start; }
+.headerRight {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.headerScrolled .headerInner {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+
+/* ---------- navigation ---------- */
+
+/*
+ * The navigation sits in its own raised pill rather than loose in the bar.
+ *
+ * It gives the header a middle — a thing to be centred on — instead of a row of
+ * links drifting toward the logo, and it reads as a paper tab laid on the sheet,
+ * which is the language the rest of the product speaks.
+ */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: rgba(253, 250, 242, 0.72);
+  border: 1px solid rgba(61, 37, 23, 0.1);
+  box-shadow: 0 8px 22px -16px rgba(30, 20, 12, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+/*
+ * Links are underlined by hand rather than by the browser: a stroke that grows
+ * out from the left, in ink, sitting slightly low the way an underline drawn with
+ * a pen does.
+ */
+.navLink {
+  position: relative;
+  display: inline-block;
+  color: var(--cream-muted);
+  text-decoration: none;
+  padding: 8px 15px;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+.navLink:hover {
+  color: var(--ink);
+  background: rgba(61, 37, 23, 0.07);
+}
+/* The page you're on is inked in, not merely tinted. */
+.navLinkActive,
+.navLinkActive:hover {
+  color: var(--on-dark);
+  background: var(--brass);
+}
+
+/* ---------- buttons ---------- */
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease, color 0.2s ease;
+}
+.cta:hover {
+  transform: translateY(-1.5px);
+}
+
+.ctaPrimary {
+  background: var(--brass);
+  color: var(--on-dark);
+  box-shadow: 0 10px 24px -14px var(--shadow-hard);
+}
+.ctaPrimary:hover {
+  background: var(--brass-hover);
+  box-shadow: 0 16px 30px -14px var(--shadow-hard);
+}
+
+.ctaSecondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid rgba(61, 37, 23, 0.26);
+}
+.ctaSecondary:hover {
+  border-color: var(--rust);
+  color: var(--rust);
+}
+
+/* ---------- the signed-in badge ---------- */
+
+/*
+ * Pressed wax rather than a flat circle, so the one piece of chrome that stands
+ * for a person belongs to the same world as the seals on the letters.
+ */
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #fdf6e8;
+  background: radial-gradient(circle at 34% 28%, #b5502e, #8a3a1e 62%, #6b2b14);
+  box-shadow: 0 6px 16px -8px rgba(90, 30, 12, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.34);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.seal:hover {
+  transform: translateY(-1.5px) rotate(-3deg);
+  box-shadow: 0 10px 20px -8px rgba(90, 30, 12, 0.85), inset 0 1px 2px rgba(255, 255, 255, 0.34);
+}
+.sealImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ---------- the menu it opens ---------- */
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 224px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid rgba(43, 32, 19, 0.14);
+  box-shadow: 0 24px 50px -22px rgba(30, 20, 12, 0.55);
+  animation: menuIn 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes menuIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.menuItem {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--ink);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.menuItem:hover {
+  background: rgba(61, 37, 23, 0.07);
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile                                                              */
+/* ------------------------------------------------------------------ */
+
+.burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(61, 37, 23, 0.22);
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.drawer {
+  display: none;
+  overflow: hidden;
+  border-top: 1px solid rgba(61, 37, 23, 0.1);
+  background: color-mix(in srgb, var(--bg0) 96%, transparent);
+  backdrop-filter: blur(14px);
+}
+.drawerOpen {
+  display: block;
+  animation: drawerIn 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes drawerIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.drawerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.drawerLink {
+  padding: 12px 2px;
+  font-size: 16px;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(61, 37, 23, 0.08);
+}
+/* Marked with a rule down the side rather than a pill: the drawer is a list, and
+   a filled chip in a column of plain text reads as a button. */
+.drawerLinkActive {
+  padding-left: 12px;
+  margin-left: -12px;
+  border-left: 2px solid var(--rust);
+  color: var(--rust);
+  font-weight: 500;
+}
+
+/* Below this the links don't fit beside the marks, so they move into the drawer. */
+@media (max-width: 1040px) {
+  .nav {
+    display: none;
+  }
+  .headerInner {
+    grid-template-columns: auto 1fr;
+  }
+  .headerRight {
+    grid-column: 2;
+  }
+  .burger {
+    display: inline-flex;
+  }
+  .headerInner {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  /* The secondary action is a symbol on small screens — the label is what goes,
+     not the action. */
+  .ctaLabel {
+    display: none;
+  }
+  .cta {
+    padding: 10px 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .ctaPrimary {
+    padding: 10px 16px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer                                                              */
+/* ------------------------------------------------------------------ */
+
+.footer {
+  position: relative;
+  padding: 76px 28px 40px;
+  margin-top: 40px;
+  background: linear-gradient(180deg, rgba(61, 37, 23, 0.05), rgba(61, 37, 23, 0.11));
+}
+
+/*
+ * A torn top edge, drawn with two overlapping conic wedges repeated across the
+ * width — irregular enough to read as a tear rather than as a zig-zag.
+ */
+.tornEdge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 16px;
+  pointer-events: none;
+  background:
+    conic-gradient(from 205deg at 50% 0, transparent 0 32%, var(--bg0) 32% 68%, transparent 68%) 0 0 /
+      34px 16px repeat-x,
+    conic-gradient(from 205deg at 50% 0, transparent 0 40%, var(--bg0) 40% 60%, transparent 60%) 17px 0 /
+      26px 11px repeat-x;
+}
+
+.footerGrid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+  gap: 40px;
+}
+@media (max-width: 860px) {
+  .footerGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+}
+@media (max-width: 520px) {
+  .footerGrid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+.footerHeading {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--label-on-dark);
+  margin: 0 0 14px;
+}
+.footerLink {
+  display: block;
+  padding: 5px 0;
+  font-size: 13.5px;
+  color: var(--cream-muted);
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.footerLink:hover {
+  color: var(--rust);
+  transform: translateX(2px);
+}
+
+.footerBase {
+  max-width: 1200px;
+  margin: 44px auto 0;
+  padding-top: 22px;
+  border-top: 1px solid rgba(61, 37, 23, 0.14);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 12.5px;
+  color: var(--cream-faint);
+}
+
+/* ------------------------------------------------------------------ */
+/* The waitlist panel                                                  */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A card laid over the seam where the page meets the footer, the way the
+ * reference designs do it — it belongs to neither, which is what makes it read as
+ * an invitation rather than as another footer row.
+ */
+.waitlist {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto -70px;
+  padding: 44px 40px;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse 70% 90% at 88% 10%, rgba(217, 164, 92, 0.32), transparent 62%),
+    linear-gradient(158deg, #4a2f1c, #2c1a0e);
+  box-shadow: 0 40px 80px -34px rgba(30, 20, 12, 0.7);
+  overflow: hidden;
+}
+.waitlistGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 36px;
+}
+@media (max-width: 780px) {
+  .waitlist {
+    padding: 34px 24px;
+    margin-bottom: -60px;
+  }
+  .waitlistGrid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+
+.waitlistForm {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.waitlistInput {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 13px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(242, 233, 212, 0.26);
+  background: rgba(253, 250, 242, 0.08);
+  color: #f6ecd8;
+  font-size: 14.5px;
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.waitlistInput::placeholder { color: rgba(242, 233, 212, 0.5); }
+.waitlistInput:focus {
+  border-color: var(--brass-bright);
+  background: rgba(253, 250, 242, 0.13);
+}
+.waitlistBtn {
+  padding: 13px 24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 500;
+  background: var(--brass-bright);
+  color: #2c1a0e;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.waitlistBtn:hover { transform: translateY(-1.5px); background: #e8b872; }
+.waitlistBtn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+/* ---------- the footer's own columns ---------- */
+
+.footerBrand { grid-column: span 1; }
+
+.socials {
+  display: flex;
+  gap: 9px;
+  margin-top: 18px;
+}
+.social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(61, 37, 23, 0.2);
+  color: var(--cream-muted);
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.social:hover {
+  color: var(--rust);
+  border-color: var(--rust);
+  transform: translateY(-2px);
+}
+
+/* ------------------------------------------------------------------ */
+/* FAQ                                                                 */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A stack of raised cards rather than a ruled list.
+ *
+ * Each question is its own object you can pick up, which is the point: a rule
+ * between rows reads as a table of contents, and a card reads as something with
+ * an inside. The card lifts on hover and lifts further when open, so the shadow
+ * is doing the work of saying which one you are in.
+ */
+.faq {
+  border-radius: 13px;
+  background-color: var(--paper);
+  border: 1px solid rgba(58, 42, 24, 0.1);
+  box-shadow: 0 1px 2px rgba(46, 30, 14, 0.05), 0 8px 20px -14px rgba(46, 30, 14, 0.28);
+  overflow: hidden;
+  transition: box-shadow 0.24s ease, border-color 0.24s ease, transform 0.24s ease;
+}
+.faq:hover {
+  border-color: rgba(58, 42, 24, 0.16);
+  box-shadow: 0 2px 4px rgba(46, 30, 14, 0.06), 0 14px 30px -16px rgba(46, 30, 14, 0.4);
+}
+.faqOpen,
+.faqOpen:hover {
+  border-color: rgba(181, 80, 46, 0.24);
+  box-shadow: 0 3px 6px rgba(46, 30, 14, 0.07), 0 22px 44px -20px rgba(46, 30, 14, 0.46);
+}
+
+.faqQ {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 19px 22px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 16.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+  transition: color 0.2s ease;
+}
+/* Safari draws its own triangle unless told otherwise. */
+.faqQ::-webkit-details-marker { display: none; }
+.faqQ:hover { color: var(--rust); }
+
+/* A chevron that turns over, the way a disclosure control has always looked. */
+.faqMark {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--ink-faint);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s ease;
+}
+.faqQ:hover .faqMark { color: var(--rust); }
+.faqMarkOpen {
+  transform: rotate(180deg);
+  color: var(--rust);
+}
+
+.faqA {
+  padding: 0 22px 21px;
+  font-size: 14.5px;
+  line-height: 1.72;
+  color: var(--ink-muted);
+  max-width: 66ch;
+}
+
+/* ---- the browser above the list ---- */
+
+.faqSearch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 14px 0 16px;
+  height: 50px;
+  border-radius: 12px;
+  background: var(--paper);
+  border: 1px solid rgba(58, 42, 24, 0.14);
+  box-shadow: 0 1px 2px rgba(46, 30, 14, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.faqSearch:focus-within {
+  border-color: rgba(181, 80, 46, 0.4);
+  box-shadow: 0 0 0 3px rgba(181, 80, 46, 0.1);
+}
+.faqSearchInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+}
+.faqSearchInput::placeholder { color: var(--ink-faint); }
+
+/* The shortcut is shown because it exists, not to decorate — it is hidden where
+   there is no keyboard to press it with. */
+.faqKbd {
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: rgba(43, 32, 19, 0.05);
+  border: 1px solid rgba(58, 42, 24, 0.12);
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+}
+.faqKbd { display: inline-flex; }
+/* Hidden where there is no keyboard to press it with. Keyed to a coarse pointer
+   alone: `hover: none` also matches anything driving the browser without a real
+   mouse, which is a keyboard user — exactly who the hint is for. */
+@media (pointer: coarse) {
+  .faqKbd { display: none; }
+}
+
+.faqChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.faqChip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid rgba(58, 42, 24, 0.14);
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.faqChip:hover { border-color: rgba(181, 80, 46, 0.3); color: var(--rust); }
+.faqChipOn {
+  background: var(--brass);
+  border-color: var(--brass);
+  color: var(--on-dark);
+}
+.faqChipOn:hover { color: var(--on-dark); }
+
+/*
+ * The ruled column.
+ *
+ * Two hairlines down the sides and one under each band. The page becomes a sheet
+ * in a binder, and — more usefully — the search box gets a shelf to sit on rather
+ * than hovering above a list with nothing holding it.
+ */
+.faqRails {
+  max-width: 900px;
+  margin: 0 auto;
+  border-left: 1px solid rgba(58, 42, 24, 0.1);
+  border-right: 1px solid rgba(58, 42, 24, 0.1);
+}
+.faqBand {
+  border-bottom: 1px solid rgba(58, 42, 24, 0.1);
+}
+/* Rails on a phone waste the two columns of space they take up. */
+@media (max-width: 640px) {
+  .faqRails {
+    border-left: none;
+    border-right: none;
+  }
+}
+
+.faqHit {
+  border-radius: 3px;
+  background: rgba(201, 146, 47, 0.28);
+  color: inherit;
+  padding: 0 1px;
+}

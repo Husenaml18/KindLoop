@@ -46,6 +46,10 @@ import { mothersDayContentSchema, emptyMothersDayContent } from "./mothers-day-l
 import { MothersDayLetterEditor } from "./mothers-day-letter/Editor";
 import { MothersDayLetterView } from "./mothers-day-letter/View";
 
+import { winYouBackContentSchema, emptyWinYouBackContent } from "./win-you-back/schema";
+import { WinYouBackEditor } from "./win-you-back/Editor";
+import { WinYouBackView } from "./win-you-back/View";
+
 export interface TemplateDefinition<TContent = unknown> {
   id: string;
   displayName: string;
@@ -192,6 +196,19 @@ export const TEMPLATE_REGISTRY = {
     emptyContent: emptyMothersDayContent,
     Editor: MothersDayLetterEditor,
     View: MothersDayLetterView,
+    fullWidthEditor: true,
+    hasDemo: true,
+  },
+  "win-you-back": {
+    id: "win-you-back",
+    displayName: "Operation: Win You Back",
+    description:
+      "Six chapters of owning it — the trip-up, the replay, the things you should have done, and a plain letter at the end. Funny first, honest throughout, and it never asks to be forgiven.",
+    isPaid: false,
+    contentSchema: winYouBackContentSchema,
+    emptyContent: emptyWinYouBackContent,
+    Editor: WinYouBackEditor,
+    View: WinYouBackView,
     fullWidthEditor: true,
     hasDemo: true,
   },

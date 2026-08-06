@@ -16,6 +16,12 @@ model User {
   emailVerified DateTime?
   image         String?
   isDevMock     Boolean   @default(false)
+  /// A line or two about themselves, shown on their own profile only.
+  bio           String?
+  /// Optional and free-form, including "prefer not to say". Nothing in the
+  /// product reads it — it exists so somebody can tell us how they'd like to be
+  /// referred to, and it is theirs to clear at any time.
+  gender        String?
 
   accounts Account[]
   sessions Session[]
@@ -97,4 +103,17 @@ model Order {
   updatedAt DateTime @updatedAt
 
   @@index([giftId])
+}
+
+/// Somebody who asked to hear when there's more.
+///
+/// Kept apart from `User` on purpose: joining the waitlist is not making an
+/// account, and conflating the two would mean an address given for one reason
+/// quietly becomes a login for another.
+model WaitlistEntry {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  /// Which page they were on when they asked — useful, and nothing more.
+  source    String   @default("footer")
+  createdAt DateTime @default(now())
 }

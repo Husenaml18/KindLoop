@@ -6,7 +6,6 @@ import { fraunces, spaceGrotesk, ibmPlexMono, gochiHand } from "../fonts";
 import { FountainPenCursor } from "../FountainPenCursor";
 import { cssStyle } from "@/lib/uiStyle";
 import { TemplateArt } from "@/app/TemplateArt";
-import { Wordmark } from "@/app/Wordmark";
 import {
   CATEGORIES,
   TEMPLATE_CATALOG,
@@ -18,6 +17,9 @@ import {
 import { Dropdown } from "./Dropdown";
 import styles from "../landing.module.css";
 import theme from "../theme.module.css";
+import { SiteHeader } from "@/app/SiteHeader";
+import { SiteFooter } from "@/app/SiteFooter";
+import { PAGE_WIDTH } from "@/app/PageContainer";
 
 const TRUST_BADGES = [
   { icon: "🔒", label: "Private by default" },
@@ -88,9 +90,9 @@ function ExperienceCard({
 
   return (
     <div
-      className={styles.galleryCard}
+      className={`${styles.galleryCard} ${theme.paperSheet}`}
       style={cssStyle(
-        "position:relative;display:flex;flex-direction:column;height:100%;border-radius:12px;overflow:hidden;background:var(--paper);border:1px solid rgba(43,38,32,.1);transition:transform .25s ease,box-shadow .25s ease"
+        "position:relative;display:flex;flex-direction:column;height:100%;border-radius:12px;overflow:hidden;border:1px solid rgba(58,42,24,.16);transition:transform .25s ease,box-shadow .25s ease"
       )}
     >
       {/* 5:4 rather than a fixed height: the artwork is square, so the old 142px
@@ -208,7 +210,17 @@ function ExperienceCard({
   );
 }
 
-export function TemplatesGallery({ photos }: { photos: string[] }) {
+export function TemplatesGallery({
+  photos,
+  accountMenu,
+  signedIn = false,
+}: {
+  photos: string[];
+  /* Passed in rather than imported: the menu reads the session on the server, and
+     this gallery is a client component. */
+  accountMenu?: React.ReactNode;
+  signedIn?: boolean;
+}) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("featured");
   const [category, setCategory] = useState("");
@@ -275,20 +287,21 @@ export function TemplatesGallery({ photos }: { photos: string[] }) {
         position: "relative",
         minHeight: "100%",
         background:
-          "linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 12%, var(--bg0) 28%, var(--bg2) 44%, var(--bg1) 62%, var(--bg0) 80%, var(--bg1) 100%)",
+          "radial-gradient(circle at 18% 26%, rgba(122,92,52,.07) .7px, transparent 1px), " +
+          "radial-gradient(circle at 72% 64%, rgba(122,92,52,.055) .6px, transparent .9px), " +
+          "radial-gradient(ellipse 92% 48% at 50% -6%, rgba(226,186,124,.34), transparent 62%), " +
+          "radial-gradient(ellipse 60% 38% at 92% 22%, rgba(190,104,64,.12), transparent 66%), " +
+          "linear-gradient(180deg, var(--bg2) 0%, var(--bg0) 32%, var(--bg1) 66%, var(--bg0) 100%)",
+        backgroundSize: "39px 43px, 57px 51px, auto, auto, auto",
         color: "var(--cream-muted)",
         fontFamily: "var(--font-space-grotesk), system-ui, sans-serif",
       }}
     >
       <FountainPenCursor />
 
-      <header style={cssStyle("padding:16px 28px")}>
-        <Link href="/" aria-label="Kindloop — home" style={{ display: "inline-block" }}>
-          <Wordmark size={26} priority />
-        </Link>
-      </header>
+      <SiteHeader account={accountMenu} signedIn={signedIn} />
 
-      <div style={cssStyle("max-width:1200px;margin:0 auto;padding:24px 28px 96px")}>
+      <div style={cssStyle(`max-width:${PAGE_WIDTH}px;margin:0 auto;padding:24px 28px 96px`)}>
         <div style={cssStyle("text-align:center;max-width:660px;margin:0 auto")}>
           <h1
             style={cssStyle(
@@ -416,6 +429,8 @@ export function TemplatesGallery({ photos }: { photos: string[] }) {
           </p>
         )}
       </div>
+
+      <SiteFooter />
     </div>
   );
 }

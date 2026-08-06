@@ -1,0 +1,284 @@
+/*
+ * The sign-in screens.
+ *
+ * Two halves: the form on the left in its own quiet column, and the product itself
+ * on the right, filling its side of the window. The split is the whole idea — a
+ * centred card on an empty page makes signing in feel like the destination, and it
+ * never is.
+ */
+
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.06fr);
+  min-height: 100dvh;
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  cursor: auto;
+  background:
+    radial-gradient(circle at 18% 26%, rgba(122, 92, 52, 0.07) 0.7px, transparent 1px),
+    radial-gradient(circle at 72% 64%, rgba(122, 92, 52, 0.055) 0.6px, transparent 0.9px),
+    radial-gradient(ellipse 92% 48% at 50% -6%, rgba(226, 186, 124, 0.34), transparent 62%),
+    linear-gradient(180deg, var(--bg2) 0%, var(--bg0) 40%, var(--bg1) 100%);
+  background-size: 39px 43px, 57px 51px, auto, auto;
+}
+
+/* ---------- left: the form ---------- */
+
+.left {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 32px 24px;
+  min-width: 0;
+}
+
+.brand {
+  display: inline-block;
+  align-self: flex-start;
+}
+
+/* A registration mark, of the kind printed in the margin of a sheet before it is
+   trimmed. The reference has one; ours belongs to the paper. */
+.mark {
+  position: absolute;
+  left: 34px;
+  top: 74px;
+  width: 15px;
+  height: 15px;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.middle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 34px 0;
+}
+
+/* Narrow on purpose. A sign-in form that spans a column reads as a settings page;
+   this one should read as a single question. */
+.form {
+  width: 100%;
+  max-width: 340px;
+}
+
+.foot {
+  text-align: center;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
+.foot a {
+  color: var(--ink-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- right: the product ---------- */
+
+.right {
+  position: relative;
+  padding: 18px 18px 18px 0;
+  min-width: 0;
+}
+
+.showcase {
+  position: relative;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--tan);
+  box-shadow: 0 30px 70px -40px rgba(46, 30, 14, 0.7);
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * The label on the print.
+ *
+ * Glass over the picture rather than a solid band: a solid one cuts the image in
+ * half and makes the bottom third of every experience unviewable, which rather
+ * defeats showing it.
+ */
+.caption {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: rgba(28, 18, 10, 0.52);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border: 1px solid rgba(255, 236, 200, 0.16);
+  color: #fdf6e8;
+}
+
+.captionName {
+  margin: 0;
+  font-family: var(--font-fraunces), serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.2;
+}
+.captionBlurb {
+  margin: 5px 0 0;
+  max-width: 42ch;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(253, 246, 232, 0.78);
+}
+
+.captionMeta {
+  margin-top: 11px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  font-size: 11.5px;
+  color: rgba(253, 246, 232, 0.72);
+}
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.metaDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #8fbf6a;
+}
+.metaLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255, 248, 236, 0.94);
+  color: #7a3418;
+  font-size: 11.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.metaLink:hover {
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.arrows {
+  display: flex;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 236, 200, 0.28);
+  background: rgba(255, 248, 236, 0.1);
+  color: #fdf6e8;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.arrow:hover {
+  background: rgba(255, 248, 236, 0.22);
+  border-color: rgba(255, 236, 200, 0.5);
+}
+
+.ticks {
+  position: absolute;
+  left: 18px;
+  top: 16px;
+  display: flex;
+  gap: 5px;
+}
+.tick {
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  border: none;
+  padding: 0;
+  background: rgba(255, 248, 236, 0.34);
+  cursor: pointer;
+  transition: background-color 0.3s ease, width 0.3s ease;
+}
+.tickOn {
+  width: 30px;
+  background: rgba(255, 248, 236, 0.92);
+}
+
+/* ---------- narrower ---------- */
+
+@media (max-width: 980px) {
+  /*
+   * The picture goes rather than shrinking.
+   *
+   * Stacked above the form it becomes a banner you scroll past to reach the field
+   * you came for, and on a phone that is the whole first screen spent on
+   * decoration. The form is the job here; on a small screen it gets the screen.
+   */
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .right {
+    display: none;
+  }
+  .left {
+    padding: 24px 24px 22px;
+  }
+  .mark {
+    display: none;
+  }
+}
+
+/* ---------- the code boxes ---------- */
+
+/*
+ * One box per character.
+ *
+ * Set in the monospace face at the size the code is printed at in the email, so
+ * what you are copying and what you are typing look like the same object.
+ */
+.codeRow {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.codeBox {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: 62px;
+  border-radius: 10px;
+  border: 1px solid rgba(43, 32, 19, 0.2);
+  background: #fffdf7;
+  text-align: center;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 21px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+.codeBox:focus {
+  border-color: rgba(181, 80, 46, 0.55);
+  box-shadow: 0 0 0 3px rgba(181, 80, 46, 0.13);
+  background: #fff;
+}
+/* A filled box reads as done rather than as merely occupied. */
+.codeBox:not(:placeholder-shown),
+.codeBox[value]:not([value=""]) {
+  border-color: rgba(43, 32, 19, 0.34);
+}

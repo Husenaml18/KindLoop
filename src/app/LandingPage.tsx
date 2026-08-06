@@ -7,10 +7,13 @@ import { fraunces, spaceGrotesk, ibmPlexMono, gochiHand } from "./fonts";
 import { FountainPenCursor } from "./FountainPenCursor";
 import { cssStyle, photoStyle } from "@/lib/uiStyle";
 import { TEMPLATE_CATALOG } from "@/lib/templateCatalog";
-import { Wordmark } from "./Wordmark";
 import { HeroStage, AssembledMemories, useEnvelopeSequence } from "./HeroStory";
 import styles from "./landing.module.css";
 import theme from "./theme.module.css";
+import { SiteHeader } from "./SiteHeader";
+import { SiteFooter } from "./SiteFooter";
+import { FaqSection } from "./FaqSection";
+import { MemoryOrbit } from "./MemoryOrbit";
 
 const GRAIN_STYLE: CSSProperties = {
   position: "fixed",
@@ -23,13 +26,27 @@ const GRAIN_STYLE: CSSProperties = {
     "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/></filter><rect width='180' height='180' filter='url(%23n)' opacity='.35'/></svg>\")",
 };
 
+/*
+ * The paper wash, fixed so it stays put while the page scrolls over it.
+ *
+ * It sits *behind* everything (`z-index: -1`), and that is not a detail: its last
+ * layer is a plain opaque gradient, so on any positive z-index this is a solid
+ * sheet of page-coloured paint covering the whole viewport. That is exactly what
+ * happened — every word on the landing page was still in the DOM, correctly sized
+ * and coloured, with this painted flat on top of it.
+ */
 const VIGNETTE_STYLE: CSSProperties = {
   position: "fixed",
   inset: 0,
   pointerEvents: "none",
-  zIndex: 59,
+  zIndex: -1,
   background:
-    "radial-gradient(ellipse 80% 60% at 50% 0%, transparent 55%, rgba(43,32,18,.18) 100%), radial-gradient(ellipse 90% 70% at 50% 100%, transparent 55%, rgba(43,32,18,.22) 100%)",
+    "radial-gradient(circle at 18% 26%, rgba(122,92,52,.07) .7px, transparent 1px), " +
+          "radial-gradient(circle at 72% 64%, rgba(122,92,52,.055) .6px, transparent .9px), " +
+          "radial-gradient(ellipse 92% 48% at 50% -6%, rgba(226,186,124,.34), transparent 62%), " +
+          "radial-gradient(ellipse 60% 38% at 92% 22%, rgba(190,104,64,.12), transparent 66%), " +
+          "linear-gradient(180deg, var(--bg2) 0%, var(--bg0) 32%, var(--bg1) 66%, var(--bg0) 100%)",
+  backgroundSize: "39px 43px, 57px 51px, auto, auto, auto",
 };
 
 function CoffeeRing({
@@ -89,73 +106,95 @@ function InkSplatter({ style }: { style?: CSSProperties }) {
   );
 }
 
+/*
+ * Everything on this page arriving as it is reached.
+ *
+ * The same language as the Templates cards: out of focus and a little low, then
+ * sharp and settled. Blur rather than a bare fade because the page is a desk full
+ * of photographs, and a photograph arriving is one coming into focus.
+ *
+ * Two things this is careful about, both of which it used to get wrong.
+ *
+ * Nothing ever *snaps*. The old backstop stripped `opacity`, `transform` and
+ * `transition` off in one go, which teleported the element from twenty-four pixels
+ * low straight into place with no animation at all — and because it ran on a timer,
+ * it did that to the whole page below the fold about two seconds after load. That
+ * was the jump on the way into Templates: by the time you got there the heading had
+ * already been thrown into position. The backstop now *reveals*, along the same
+ * transition as everything else.
+ *
+ * And nothing stays hidden. Reveal is decoration; it is never allowed to be the
+ * reason something cannot be read. Anything the observer has not reached within a
+ * few seconds is shown regardless.
+ */
+const REVEAL_MS = 780;
+
 function useRevealOnScroll() {
   useEffect(() => {
-    const all = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    const vh = window.innerHeight || 800;
+    /* Never hide anything if the browser cannot tell us when to bring it back. */
+    if (!("IntersectionObserver" in window)) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
 
-    const clear = (el: HTMLElement) => {
+    const vh = window.innerHeight || 800;
+    const all = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    const items = all.filter((el) => el.getBoundingClientRect().top > vh * 0.9);
+
+    /* Put the inline properties back once the animation has finished, so a card's
+       own hover transform is not permanently overridden by `transform: none`. */
+    const settle = (el: HTMLElement) => {
       el.style.removeProperty("opacity");
       el.style.removeProperty("transform");
+      el.style.removeProperty("filter");
       el.style.removeProperty("transition");
+      el.style.removeProperty("will-change");
     };
+
+    const shown = new WeakSet<HTMLElement>();
     const reveal = (el: HTMLElement) => {
+      if (shown.has(el)) return;
+      shown.add(el);
       el.style.opacity = "1";
       el.style.transform = "none";
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => {
-          if (getComputedStyle(el).opacity === "0") clear(el);
-        })
-      );
+      el.style.filter = "none";
+      window.setTimeout(() => settle(el), REVEAL_MS + 260);
     };
 
-    const items = all.filter((el) => el.getBoundingClientRect().top > vh);
     items.forEach((el, i) => {
-      const d = (i % 4) * 70;
+      const d = (i % 3) * 80;
       el.style.opacity = "0";
-      el.style.transform = "translateY(24px)";
-      el.style.transition = `opacity .85s cubic-bezier(.2,.8,.2,1) ${d}ms, transform .85s cubic-bezier(.2,.8,.2,1) ${d}ms`;
+      el.style.transform = "translateY(18px)";
+      el.style.filter = "blur(7px)";
+      el.style.willChange = "opacity, transform, filter";
+      el.style.transition =
+        `opacity ${REVEAL_MS}ms cubic-bezier(.2,.8,.2,1) ${d}ms,` +
+        `transform ${REVEAL_MS}ms cubic-bezier(.2,.8,.2,1) ${d}ms,` +
+        `filter ${REVEAL_MS}ms cubic-bezier(.2,.8,.2,1) ${d}ms`;
     });
 
-    const inView = (el: HTMLElement) => {
-      const r = el.getBoundingClientRect();
-      return r.top < (window.innerHeight || 0) - 20 && r.bottom > -40;
-    };
-
-    let io: IntersectionObserver | undefined;
-    let onScroll: (() => void) | undefined;
-    let safety: ReturnType<typeof setTimeout> | undefined;
-
-    if ("IntersectionObserver" in window) {
-      io = new IntersectionObserver((entries) => {
+    /* A shade before the edge, so a block is already resolving by the time it is
+       properly on screen rather than starting the moment you can see it. */
+    const io = new IntersectionObserver(
+      (entries) => {
         entries.forEach((e) => {
-          if (e.isIntersecting) {
-            reveal(e.target as HTMLElement);
-            io?.unobserve(e.target);
-          }
+          if (!e.isIntersecting) return;
+          reveal(e.target as HTMLElement);
+          io.unobserve(e.target);
         });
-      }, { threshold: 0 });
-      items.forEach((el) => io!.observe(el));
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0 }
+    );
+    items.forEach((el) => io.observe(el));
 
-      onScroll = () =>
-        items.forEach((el) => {
-          if (el.style.opacity !== "1" && inView(el)) reveal(el);
-        });
-      window.addEventListener("scroll", onScroll, { passive: true });
-
-      safety = setTimeout(() => {
-        items.forEach((el) => {
-          if (getComputedStyle(el).opacity === "0" && inView(el)) clear(el);
-        });
-      }, 1500);
-    } else {
-      items.forEach(clear);
-    }
+    const backstop = window.setTimeout(() => {
+      items.forEach(reveal);
+    }, 4000);
 
     return () => {
-      io?.disconnect();
-      if (onScroll) window.removeEventListener("scroll", onScroll);
-      if (safety) clearTimeout(safety);
+      io.disconnect();
+      window.clearTimeout(backstop);
+      /* Leaving the page mid-animation must not leave anything invisible. */
+      items.forEach(settle);
     };
   }, []);
 }
@@ -276,28 +315,48 @@ const OCCASIONS = [
   { name: "Condolence", sub: "a place to remember" },
 ];
 
-export default function LandingPage({ photos }: { photos: string[] }) {
+export default function LandingPage({
+  photos,
+  accountMenu,
+  signedIn = false,
+}: {
+  photos: string[];
+  /* Handed down because the session is read on the server and this page is a
+     client component. */
+  accountMenu?: React.ReactNode;
+  signedIn?: boolean;
+}) {
   useRevealOnScroll();
   const phase = useEnvelopeSequence();
   const templatesAnchorRef = useRef<HTMLDivElement>(null);
   const assembled = useAssembleOnScroll(templatesAnchorRef);
 
-  /* Counted, never written by hand: this line still read "two ready now" long
-     after the ninth experience had shipped. */
+  /* Read from the catalogue rather than written by hand, but deliberately
+     without a number in it. Counting shipped experiences out loud invites the
+     reader to decide whether nine is a lot, and the honest answer while this is
+     still small is that it isn't the point. */
   const liveCount = TEMPLATE_CATALOG.filter((t) => t.status === "available").length;
   const readyNote =
-    liveCount === 0
-      ? "all still in the workshop"
-      : `${liveCount} ready now, the rest in the workshop`;
+    liveCount === 0 ? "all still in the workshop" : "ready now, with more in the workshop";
 
   return (
     <div
       className={`${theme.themeRoot} ${styles.penCursor} ${fraunces.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} ${gochiHand.variable}`}
       style={{
         position: "relative",
-        overflowX: "hidden",
+        /* `clip`, not `hidden`: `overflow-x: hidden` turns this into a scroll
+           container, which silently breaks `position: sticky` on the header
+           inside it. `clip` cuts the overflow without that side effect. */
+        overflowX: "clip",
         background:
-          "linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 10%, var(--bg0) 22%, var(--bg2) 36%, var(--bg1) 50%, var(--bg0) 64%, var(--bg2) 78%, var(--bg1) 90%, var(--bg0) 100%)",
+          /* Kraft, with the weave showing. Flat colour reads as a swatch; the
+             crossing fibres and the two warm washes are what make it a table
+             something is lying on. */
+          "repeating-linear-gradient(94deg, rgba(120,96,60,.045) 0 1px, transparent 1px 4px), " +
+          "repeating-linear-gradient(4deg, rgba(120,96,60,.035) 0 1px, transparent 1px 5px), " +
+          "radial-gradient(ellipse 90% 55% at 50% -6%, rgba(232,196,132,.44), transparent 62%), " +
+          "radial-gradient(ellipse 66% 40% at 88% 16%, rgba(196,98,60,.18), transparent 66%), " +
+          "linear-gradient(180deg, var(--bg2) 0%, var(--bg0) 26%, var(--bg1) 58%, var(--bg0) 100%)",
         color: "var(--cream-muted)",
         fontFamily: "var(--font-space-grotesk), system-ui, sans-serif",
       }}
@@ -308,35 +367,17 @@ export default function LandingPage({ photos }: { photos: string[] }) {
       <div
         aria-hidden
         style={cssStyle(
-          "position:fixed;left:50%;top:30%;transform:translate(-50%,-50%);width:1400px;height:1400px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(232,163,61,.14),rgba(193,96,59,.08) 45%,transparent 72%)"
+          "position:fixed;left:50%;top:30%;transform:translate(-50%,-50%);width:1400px;height:1400px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(255,206,140,.2),rgba(226,132,92,.1) 45%,transparent 72%)"
         )}
       />
 
-      <header
-        style={cssStyle(
-          "position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);background:rgba(242,233,212,.86);border-bottom:1px solid rgba(43,38,32,.1)"
-        )}
-      >
-        <div style={cssStyle("max-width:1200px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px")}>
-          <Link href="/" aria-label="Kindloop — home" style={{ display: "block" }}>
-            <Wordmark size={30} priority />
-          </Link>
-          <nav style={cssStyle("display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:24px;font-size:14.5px")}>
-            <Link href="/templates" className={styles.navLink}>{"Templates"}</Link>
-            <a href="#how" className={styles.navLink}>{"How it works"}</a>
-            <a href="#occasions" className={styles.navLink}>{"Occasions"}</a>
-            <a href="#what" className={styles.navLink}>{"Why Kindloop"}</a>
-            <Link href="/sign-in" className={styles.navLink}>{"Sign in"}</Link>
-            <StampButton href="/templates" variant="brass">{"Create a memory  ✦"}</StampButton>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader account={accountMenu} signedIn={signedIn} />
 
       <section style={cssStyle("position:relative;padding:84px 28px 116px")}>
         <div style={cssStyle("position:absolute;inset:-6% -8% 10%;pointer-events:none;overflow:hidden")}>
-          <div className={styles.aura1} style={cssStyle("position:absolute;left:4%;top:0;width:560px;height:520px;border-radius:50%;background:radial-gradient(circle at 45% 45%, rgba(201,154,68,.22), rgba(201,154,68,0) 70%);filter:blur(20px)")} />
-          <div className={styles.aura2} style={cssStyle("position:absolute;right:0;top:-8%;width:640px;height:620px;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(180,80,42,.2), rgba(180,80,42,0) 70%);filter:blur(22px)")} />
-          <div className={styles.aura3} style={cssStyle("position:absolute;left:34%;bottom:-10%;width:520px;height:420px;border-radius:50%;background:radial-gradient(circle, rgba(138,128,88,.22), rgba(138,128,88,0) 70%);filter:blur(24px)")} />
+          <div className={styles.aura1} style={cssStyle("position:absolute;left:4%;top:0;width:560px;height:520px;border-radius:50%;background:radial-gradient(circle at 45% 45%, rgba(240,196,124,.3), rgba(240,196,124,0) 70%);filter:blur(20px)")} />
+          <div className={styles.aura2} style={cssStyle("position:absolute;right:0;top:-8%;width:640px;height:620px;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(224,124,84,.24), rgba(224,124,84,0) 70%);filter:blur(22px)")} />
+          <div className={styles.aura3} style={cssStyle("position:absolute;left:34%;bottom:-10%;width:520px;height:420px;border-radius:50%;background:radial-gradient(circle, rgba(232,190,120,.26), rgba(232,190,120,0) 70%);filter:blur(24px)")} />
         </div>
         <CoffeeRing size={190} style={{ left: "-40px", bottom: "-30px", transform: "scale(1, .82) rotate(-8deg)" }} />
         <InkSplatter style={{ left: "6%", top: "18px" }} />
@@ -373,7 +414,7 @@ export default function LandingPage({ photos }: { photos: string[] }) {
             </p>
             <div data-reveal="1" style={cssStyle("margin-top:32px;display:flex;flex-wrap:wrap;gap:14px")}>
               <StampButton href="/templates" variant="brass">{"Create a memory  ✦"}</StampButton>
-              <StampButton href="#templates" variant="outlineLight">{"Explore templates  →"}</StampButton>
+              <StampButton href="/demo" variant="outlineLight">{"Watch demos  →"}</StampButton>
             </div>
             <div data-reveal="1" style={cssStyle("margin-top:34px;display:flex;flex-wrap:wrap;gap:26px")}>
               {[
@@ -582,10 +623,10 @@ export default function LandingPage({ photos }: { photos: string[] }) {
             <InkSplatter style={{ left: "calc(100% + 14px)", top: "8px" }} />
           </div>
 
-          {/* The memories that left the envelope land here. Same DOM nodes —
-              Framer Motion morphs each one from its hero position into its card. */}
+          {/* The memories that left the envelope land here, each one developing
+              into focus as it reaches the viewport. */}
           <div ref={templatesAnchorRef} style={cssStyle("margin-top:42px")}>
-            <AssembledMemories photos={photos} assembled={assembled} />
+            <AssembledMemories photos={photos} />
           </div>
 
           <div style={cssStyle("margin-top:34px;display:flex;flex-wrap:wrap;align-items:center;gap:14px")}>
@@ -595,66 +636,102 @@ export default function LandingPage({ photos }: { photos: string[] }) {
         </div>
       </section>
 
-      <section id="inside" style={cssStyle("padding:96px 28px;background:linear-gradient(180deg,transparent 0%,var(--deep) 18%,var(--deep) 82%,transparent 100%);color:var(--on-dark)")}>
-        <div style={cssStyle("max-width:1200px;margin:0 auto")}>
+      {/*
+        Inside a memory.
+        
+        Redesigned onto the same kraft as the rest of the page. It used to be a
+        full-bleed dark panel fading in and out of the background, which since the
+        palette became vintage paper read as a muddy brown smear across the middle
+        of the page — and the two fades were the ugliest part of it. Now it is what
+        the reference is: paper laid on a table, held down with tape, with the notes
+        written on a card beside it.
+      */}
+      <section id="inside" style={cssStyle("position:relative;padding:96px 28px")}>
+        <CoffeeRing size={200} faint style={{ right: "-56px", top: "8%", transform: "scale(1,.86) rotate(11deg)" }} />
+
+        <div style={cssStyle("position:relative;max-width:1200px;margin:0 auto")}>
           <div data-reveal="1" style={cssStyle("max-width:620px")}>
-            <div style={cssStyle("font-family:var(--font-ibm-plex-mono),monospace;font-size:11px;letter-spacing:.16em;color:var(--brass-bright)")}>{"INSIDE A MEMORY"}</div>
-            <h2 style={cssStyle("margin:14px 0 0;font-family:var(--font-fraunces),serif;font-weight:500;font-size:clamp(32px,3.6vw,50px);line-height:1.08;letter-spacing:-.014em;color:var(--on-dark)")}>
+            <div style={cssStyle("font-family:var(--font-ibm-plex-mono),monospace;font-size:11px;letter-spacing:.16em;color:var(--label-on-dark)")}>{"INSIDE A MEMORY"}</div>
+            <h2 style={cssStyle("margin:14px 0 0;font-family:var(--font-fraunces),serif;font-weight:500;font-size:clamp(32px,3.6vw,50px);line-height:1.08;letter-spacing:-.014em;color:var(--cream)")}>
               {"What one page is actually made of."}
             </h2>
-            <p style={cssStyle("margin:16px 0 0;font-size:17px;line-height:1.65;color:rgba(244,236,221,.78);max-width:540px")}>
+            <p style={cssStyle("margin:16px 0 0;font-size:17px;line-height:1.65;color:var(--cream-muted);max-width:540px")}>
               {"A single spread from a Digital Scrapbook, taken apart. Every piece is something you chose."}
             </p>
           </div>
 
-          <div style={cssStyle("margin-top:46px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:40px;align-items:center")}>
-            <div data-reveal="1" style={cssStyle("position:relative;padding:26px;border-radius:10px;background:rgba(244,236,221,.06);border:1px solid rgba(244,236,221,.12)")}>
-              <div style={cssStyle("position:relative;padding:20px;border-radius:8px;background:var(--paper)")}>
+          <div style={cssStyle("margin-top:46px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:44px;align-items:start")}>
+            {/* the spread itself, sitting slightly askew on the table */}
+            <div data-reveal="1" style={cssStyle("position:relative")}>
+              <div
+                className={theme.paperSheet}
+                style={cssStyle("position:relative;padding:22px;border-radius:4px;transform:rotate(-1.1deg);border:1px solid rgba(58,42,24,.14)")}
+              >
+                {/* a strip of tape holding it down */}
+                <span
+                  aria-hidden
+                  style={cssStyle("position:absolute;left:-18px;top:26px;width:72px;height:24px;transform:rotate(-24deg);background:linear-gradient(160deg,rgba(226,208,168,.85),rgba(206,184,140,.7));box-shadow:0 2px 5px rgba(46,30,14,.18)")}
+                />
                 <div style={cssStyle("display:grid;grid-template-columns:1.1fr 1fr;gap:16px")}>
                   <div>
-                    <div style={photoStyle(photos, 14, "position:relative;height:132px;border-radius:5px", "var(--tan)")}>
-                      <div style={cssStyle("position:absolute;left:-14px;top:-9px;width:62px;height:20px;transform:rotate(-13deg);background:rgba(201,154,68,.6)")} />
-                    </div>
-                    <div style={cssStyle("margin-top:10px;font-family:var(--font-gochi),cursive;font-size:20px;color:var(--ink)")}>{"the kitchen in Lisbon"}</div>
+                    <div style={photoStyle(photos, 14, "position:relative;height:150px;border-radius:2px;box-shadow:0 8px 18px -12px rgba(46,30,14,.6)", "var(--tan)")} />
+                    <div style={cssStyle("margin-top:11px;font-family:var(--font-gochi),cursive;font-size:20px;color:var(--ink)")}>{"the kitchen in Lisbon"}</div>
                   </div>
                   <div>
                     <div style={cssStyle("font-family:var(--font-ibm-plex-mono),monospace;font-size:9px;letter-spacing:.1em;color:var(--label-on-paper)")}>{"SPREAD 04"}</div>
                     <div style={cssStyle("margin-top:8px;font-family:var(--font-fraunces),serif;font-size:19px;line-height:1.3;color:var(--ink)")}>{"You burned the rice and we ate it anyway."}</div>
                     <div style={cssStyle("margin-top:10px;display:grid;gap:6px")}>
-                      <div style={cssStyle("height:1px;background:rgba(33,27,22,.15)")} />
-                      <div style={cssStyle("height:1px;background:rgba(33,27,22,.15)")} />
-                      <div style={cssStyle("height:1px;background:rgba(33,27,22,.15);width:62%")} />
+                      <div style={cssStyle("height:1px;background:rgba(58,42,24,.16)")} />
+                      <div style={cssStyle("height:1px;background:rgba(58,42,24,.16)")} />
+                      <div style={cssStyle("height:1px;background:rgba(58,42,24,.16);width:62%")} />
                     </div>
-                    <div style={cssStyle("margin-top:12px;display:flex;align-items:center;gap:8px")}>
-                      <div style={cssStyle("width:22px;height:22px;border-radius:50%;background:var(--deep)")} />
+                    <div style={cssStyle("margin-top:14px;display:flex;align-items:center;gap:9px")}>
+                      <div style={cssStyle("width:24px;height:24px;border-radius:50%;background:var(--rust);display:flex;align-items:center;justify-content:center;color:#fdf6e8;font-size:9px")}>{"\u25B6"}</div>
                       <div style={cssStyle("display:flex;align-items:flex-end;gap:2px;height:18px")}>
-                        {[40, 80, 55, 95, 45].map((h, i) => (
-                          <div key={i} style={cssStyle(`width:3px;height:${h}%;background:${h >= 70 ? "var(--deep)" : "var(--tan)"};border-radius:2px`)} />
+                        {[40, 80, 55, 95, 45, 70, 38].map((h, i) => (
+                          <div key={i} style={cssStyle(`width:3px;height:${h}%;background:${h >= 70 ? "var(--rust)" : "var(--tan-deep)"};border-radius:2px`)} />
                         ))}
                       </div>
+                      <span style={cssStyle("font-family:var(--font-ibm-plex-mono),monospace;font-size:9px;color:var(--label-on-paper)")}>{"0:30"}</span>
                     </div>
                   </div>
                 </div>
-                <div style={cssStyle("position:absolute;right:-8px;top:16px;bottom:16px;width:14px;border-radius:0 6px 6px 0;background:linear-gradient(90deg,var(--paper),var(--paper-muted))")} />
               </div>
+
+              {/* the next page, showing underneath */}
+              <span
+                aria-hidden
+                style={cssStyle("position:absolute;left:14px;right:-10px;bottom:-9px;height:22px;border-radius:0 0 4px 4px;background:var(--paper-muted);transform:rotate(-.4deg);box-shadow:0 10px 22px -16px rgba(46,30,14,.6);z-index:-1")}
+              />
             </div>
 
-            <div data-reveal="1" style={cssStyle("display:grid;gap:20px")}>
-              {[
-                { n: "01", title: "The photo, taped in", body: "Drop yours in and it lands slightly crooked, like it would on paper." },
-                { n: "02", title: "A handwritten caption", body: "Six words in your own script, sitting under the picture where it belongs." },
-                { n: "03", title: "The story on the facing page", body: "As long or as short as you want. This is the part they read twice." },
-                { n: "04", title: "Thirty seconds of your voice", body: "Optional, and the thing people replay most." },
-                { n: "05", title: "The page edge", body: "Drag it and the paper turns, with weight. Small thing. Changes everything." },
-              ].map((item) => (
-                <div key={item.n} style={cssStyle("display:flex;gap:14px")}>
-                  <span style={cssStyle("font-family:var(--font-ibm-plex-mono),monospace;font-size:11px;color:var(--brass-bright);padding-top:4px")}>{item.n}</span>
-                  <div>
-                    <div style={cssStyle("font-size:17px;font-weight:600;color:var(--on-dark)")}>{item.title}</div>
-                    <p style={cssStyle("margin:5px 0 0;font-size:14.5px;line-height:1.6;color:rgba(244,236,221,.75)")}>{item.body}</p>
+            {/* the notes, on a card clipped to the table */}
+            <div
+              data-reveal="1"
+              className={theme.paperSheet}
+              style={cssStyle("position:relative;padding:30px 28px;border-radius:4px;transform:rotate(.5deg);border:1px solid rgba(58,42,24,.14)")}
+            >
+              <span
+                aria-hidden
+                style={cssStyle("position:absolute;right:26px;top:-13px;width:20px;height:44px;border:2.5px solid var(--brass-bright);border-radius:10px 10px 3px 3px;border-bottom-color:transparent;opacity:.85")}
+              />
+              <div style={cssStyle("display:grid;gap:19px")}>
+                {[
+                  { n: "01", title: "The photo, taped in", body: "Drop yours in and it lands slightly crooked, like it would on paper." },
+                  { n: "02", title: "A handwritten caption", body: "Six words in your own script, sitting under the picture where it belongs." },
+                  { n: "03", title: "The story on the facing page", body: "As long or as short as you want. This is the part they read twice." },
+                  { n: "04", title: "Thirty seconds of your voice", body: "Optional, and the thing people replay most." },
+                  { n: "05", title: "The page edge", body: "Drag it and the paper turns, with weight. Small thing. Changes everything." },
+                ].map((item) => (
+                  <div key={item.n} style={cssStyle("display:flex;gap:14px")}>
+                    <span style={cssStyle("font-family:var(--font-ibm-plex-mono),monospace;font-size:10.5px;color:var(--rust);padding-top:4px")}>{item.n}</span>
+                    <div>
+                      <div style={cssStyle("font-size:16.5px;font-weight:600;color:var(--ink)")}>{item.title}</div>
+                      <p style={cssStyle("margin:5px 0 0;font-size:14.5px;line-height:1.6;color:var(--ink-muted)")}>{item.body}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -762,6 +839,10 @@ export default function LandingPage({ photos }: { photos: string[] }) {
         </div>
       </section>
 
+      {/* Placed before the testimonials on purpose: it answers "who is this for"
+          just as somebody starts wondering whether it is for them. */}
+      <MemoryOrbit photos={photos} />
+
       <section style={cssStyle("padding:96px 28px")}>
         <div style={cssStyle("max-width:1200px;margin:0 auto")}>
           <div data-reveal="1" style={cssStyle("font-family:var(--font-ibm-plex-mono),monospace;font-size:11px;letter-spacing:.16em;color:var(--label-on-dark)")}>{"FROM PEOPLE WHO MADE ONE"}</div>
@@ -775,6 +856,8 @@ export default function LandingPage({ photos }: { photos: string[] }) {
           </div>
         </div>
       </section>
+
+      <FaqSection />
 
       <section id="create" style={cssStyle("position:relative;padding:118px 28px 126px;overflow:hidden")}>
         <div style={cssStyle("position:absolute;inset:0;pointer-events:none")}>
@@ -804,21 +887,7 @@ export default function LandingPage({ photos }: { photos: string[] }) {
         </div>
       </section>
 
-      <footer style={cssStyle("padding:42px 28px;border-top:1px solid rgba(43,38,32,.12)")}>
-        <div style={cssStyle("max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between")}>
-          <div style={cssStyle("display:flex;align-items:center;gap:10px")}>
-            <Wordmark size={24} />
-            <span style={cssStyle("font-size:13.5px;color:var(--cream-faint)")}>{"Small gestures, kept."}</span>
-          </div>
-          <div style={cssStyle("display:flex;flex-wrap:wrap;gap:22px;font-size:13.5px")}>
-            <a href="#templates" className={styles.footerLink}>{"Templates"}</a>
-            <a href="#how" className={styles.footerLink}>{"How it works"}</a>
-            <a href="#occasions" className={styles.footerLink}>{"Occasions"}</a>
-            <a href="#what" className={styles.footerLink}>{"Privacy"}</a>
-            <span style={cssStyle("color:var(--cream-faint)")}>{"© 2026"}</span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

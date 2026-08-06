@@ -1,0 +1,123 @@
+/*
+ * The table the experiences are lying on.
+ *
+ * Warm and slightly worn, with a weave running across it — the same reading as the
+ * kraft ground the rest of the product sits on, turned up to hold its own against
+ * the pale cards beside it.
+ */
+
+.table {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 420px;
+  background: radial-gradient(ellipse 80% 70% at 30% 12%, #e88a5c, #c9542e 46%, #8a3a1e 100%);
+  box-shadow: 0 26px 56px -32px rgba(90, 30, 12, 0.7);
+}
+
+.weave {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(102deg, rgba(255, 236, 190, 0.06) 0 2px, transparent 2px 16px);
+}
+
+.head {
+  position: relative;
+  padding: 26px 24px 0;
+}
+.label {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 240, 214, 0.72);
+}
+.claim {
+  margin: 12px 0 0;
+  max-width: 300px;
+  font-family: var(--font-fraunces), serif;
+  font-size: 23px;
+  line-height: 1.24;
+  color: #fff6e6;
+}
+.sub {
+  margin: 12px 0 0;
+  max-width: 320px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 232, 206, 0.78);
+}
+.aside {
+  margin: 14px 0 0;
+  font-family: var(--font-gochi), cursive;
+  font-size: 16px;
+  color: rgba(255, 226, 190, 0.82);
+}
+
+/*
+ * The chips are laid out by flex-wrap and then dragged from wherever that put them.
+ *
+ * Framer moves a dragged element with `transform`, which leaves the layout box
+ * exactly where it was — so the wrap handles every screen width for free, and the
+ * drag never reflows anything around it.
+ */
+.field {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 11px 10px;
+  padding: 26px 22px 30px;
+  /* The chips are pulled out of the flow visually; this keeps a dragged one on top
+     of its neighbours rather than sliding under them. */
+  isolation: isolate;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 17px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: rgba(255, 248, 236, 0.95);
+  color: #7a3418;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.004em;
+  box-shadow: 0 8px 18px -10px rgba(60, 16, 4, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  will-change: transform;
+}
+.chip:active { cursor: grabbing; }
+
+.tidy {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  z-index: 6;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 236, 200, 0.34);
+  background: rgba(90, 32, 14, 0.4);
+  backdrop-filter: blur(6px);
+  font-family: inherit;
+  font-size: 12px;
+  color: #ffe6c8;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.tidy:hover {
+  background: rgba(90, 32, 14, 0.62);
+  border-color: rgba(255, 236, 200, 0.6);
+}
+
+@media (max-width: 620px) {
+  .table { min-height: 360px; }
+  .chip { font-size: 12.5px; padding: 9px 14px; }
+}
