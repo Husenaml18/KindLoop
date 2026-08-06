@@ -1,0 +1,56 @@
+/*
+ * The Kindloop palette, on its own.
+ *
+ * Split out of `landing.module.css` because three screens want these colours and
+ * only one of them wants the landing page's decoration. Importing the whole
+ * landing stylesheet to borrow a few custom properties is how the create screen
+ * and the templates gallery ended up inheriting `cursor: none` and losing their
+ * pointers — a page should not have to opt out of another page's rules.
+ *
+ * Anything in here must be a token. Behaviour belongs to the page that wants it.
+ */
+.themeRoot {
+  /* Pure coffee palette: milk-latte paper, espresso-brown accents, caramel
+     highlights, cinnamon-rust for contrast. No green anywhere. */
+  --bg0: #e8d9bd;
+  --bg1: #e2cea8;
+  --bg2: #dcc599;
+  --deep: #3d2517;
+  --deep2: #24140b;
+
+  --paper: #f2e9d4;
+  --paper-muted: #e6d4ae;
+
+  --ink: #2b2013;
+  --ink-muted: #6b5642;
+  --ink-faint: #8f7a63;
+  --label-on-paper: #7a5c3e;
+
+  --cream: #3d2517;
+  --cream-muted: #6b5642;
+  --cream-faint: #8f7a63;
+  --label-on-dark: #7a5c3e;
+
+  /* For content sitting on an intentionally dark local surface (--deep,
+     --deep2, --brass) — distinct from --cream, which is dark ink text
+     for the light page background. */
+  --on-dark: #f2e9d4;
+  --on-dark-muted: #d6c4a4;
+
+  --brass: #3d2517;
+  --brass-hover: #24140b;
+  --brass-bright: #d9a45c;
+
+  --rust: #b5502e;
+  --rust-hover: #8a3a1e;
+  --rust-light: #d98a68;
+
+  --khaki: #6b5540;
+  --khaki-light: #d4c3a3;
+  --khaki-pale: #ecdfc4;
+
+  --tan: #d9c4a0;
+  --tan-deep: #b89b6e;
+
+  --shadow-hard: rgba(30, 20, 12, 0.4);
+}

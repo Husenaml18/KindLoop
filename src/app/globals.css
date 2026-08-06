@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+}
+
+@keyframes penWriting {
+  0%, 100% {
+    transform: rotate(35deg) translateX(0);
+  }
+  50% {
+    transform: rotate(29deg) translateX(-2px);
+  }
+}
+
+@keyframes inkDropFade {
+  0% {
+    transform: scale(.4);
+    opacity: .9;
+  }
+  30% {
+    transform: scale(1.15);
+    opacity: .85;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

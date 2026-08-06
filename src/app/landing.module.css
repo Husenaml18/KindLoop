@@ -1,0 +1,113 @@
+/*
+ * The landing page's own decoration: the cursor opt-out, the drifting keepsakes,
+ * the coffee rings, the stamp buttons.
+ *
+ * The palette lives in `theme.module.css` — see the note there.
+ */
+/*
+ * Hiding the system cursor is opt-in, and deliberately *not* part of `.themeRoot`.
+ *
+ * It used to be welded to the theme, which meant every screen that wanted the
+ * coffee-paper palette also lost its pointer — the templates gallery and the
+ * create screen both ended up with no cursor at all, since neither of them draws
+ * the fountain pen. Only a page that renders `<FountainPenCursor />` should add
+ * this class; an editor in particular needs the real pointer and text caret.
+ */
+.penCursor,
+.penCursor * {
+  cursor: none;
+}
+
+@keyframes driftA {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--r, 0deg)); }
+  50% { transform: translate3d(0, -13px, 0) rotate(var(--r, 0deg)); }
+}
+@keyframes driftB {
+  0%, 100% { transform: translate3d(0, -9px, 0) rotate(var(--r, 0deg)); }
+  50% { transform: translate3d(0, 11px, 0) rotate(var(--r, 0deg)); }
+}
+@keyframes aura {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(3%, -4%, 0) scale(1.14); }
+}
+@keyframes motes {
+  0% { transform: translateY(0); opacity: 0; }
+  15% { opacity: .7; }
+  100% { transform: translateY(-180px); opacity: 0; }
+}
+@keyframes dash {
+  to { stroke-dashoffset: -240; }
+}
+
+.drift1 { animation: driftA 9.5s ease-in-out infinite; }
+.drift2 { animation: driftB 11.5s ease-in-out infinite; }
+.drift3 { animation: driftA 13s ease-in-out infinite; }
+.drift4 { animation: driftB 8.5s ease-in-out infinite; }
+.drift5 { animation: driftB 10.5s ease-in-out infinite; }
+.drift6 { animation: driftA 12s ease-in-out infinite; }
+
+.aura1 { animation: aura 20s ease-in-out infinite; }
+.aura2 { animation: aura 26s ease-in-out infinite reverse; }
+.aura3 { animation: aura 30s ease-in-out infinite; }
+.aura4 { animation: aura 22s ease-in-out infinite; }
+.aura5 { animation: aura 27s ease-in-out infinite reverse; }
+
+.motes1 { animation: motes 7s linear infinite; }
+.motes2 { animation: motes 9s linear infinite 1.4s; }
+.motes3 { animation: motes 7.5s linear infinite; }
+.motes4 { animation: motes 9.5s linear infinite 1.6s; }
+
+.dashPath { animation: dash 20s linear infinite; }
+
+/* Soft pill buttons with a warm, gently lifting hover — base + variant colors
+   both live here (never inline) because inline style always wins over an
+   external :hover rule for any property it also declares. */
+
+.stampBtn {
+  border-radius: 999px;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
+  box-shadow: 0 10px 24px -14px var(--shadow-hard);
+}
+.stampBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -14px var(--shadow-hard);
+}
+
+.stampBrass { background: var(--brass); color: var(--on-dark); }
+.stampBrass:hover { background: var(--brass-hover); }
+
+.stampOutlineDark { background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
+.stampOutlineDark:hover { border-color: var(--rust); color: var(--rust); }
+
+.stampOutlineLight { background: transparent; border: 1.5px solid rgba(43, 38, 32, .3); color: var(--cream); }
+.stampOutlineLight:hover { border-color: var(--brass); color: var(--brass); }
+
+.navLink { color: var(--cream-muted); transition: color .2s ease; }
+.navLink:hover { color: var(--brass); }
+
+.footerLink { color: var(--cream-muted); transition: color .2s ease; }
+.footerLink:hover { color: var(--brass); }
+
+.featureCard { transform: translateY(0); box-shadow: 0 0 0 0 transparent; }
+.featureCard:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -28px rgba(0, 0, 0, .55); }
+
+.featureCardDark { transform: translateY(0); }
+.featureCardDark:hover { transform: translateY(-4px); }
+
+.templateCard { transform: translateY(0); box-shadow: 0 0 0 0 transparent; }
+.templateCard:hover { transform: translateY(-6px); box-shadow: 0 28px 54px -30px rgba(0, 0, 0, .6); }
+
+.workshopCard { border-color: rgba(43, 38, 32, .16); background: rgba(43, 38, 32, .02); transform: translateY(0); }
+.workshopCard:hover { border-color: var(--rust); background: rgba(43, 38, 32, .05); transform: translateY(-3px); }
+
+.galleryCard { transform: translateY(0); box-shadow: 0 0 0 0 transparent; }
+.galleryCard:hover { transform: translateY(-4px); box-shadow: 0 22px 40px -26px rgba(0, 0, 0, .5); }
+.galleryCard:hover .galleryOverlay { opacity: 1; }
+
+.occasionCard { border-color: rgba(43, 38, 32, .08); transform: translateY(0); }
+.occasionCard:hover { border-color: var(--rust); transform: translateY(-4px); }
+
+.masonry { column-count: 1; column-gap: 16px; }
+@media (min-width: 640px) { .masonry { column-count: 2; } }
+@media (min-width: 980px) { .masonry { column-count: 3; } }
+@media (min-width: 1240px) { .masonry { column-count: 4; } }
