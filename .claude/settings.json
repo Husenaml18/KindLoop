@@ -20,7 +20,17 @@
       "Bash(curl -s -o /dev/null -w \"/g/seed-win-you-back -> %{http_code}\\\\n\" --max-time 25 http://localhost:3000/g/seed-win-you-back)",
       "Bash(kill 269487)",
       "Bash(grep -v \"^\\\\.env\\\\.example$\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(prisma generate *)",
+      "Bash(echo \"=== does `prisma generate` survive a build with no DATABASE_URL? \\(Vercel installs before env is guaranteed\\) ===\")",
+      "Bash(env -u DATABASE_URL npx prisma generate)",
+      "Bash(curl -s -o /dev/null -w \"/g/does-not-exist   -> %{http_code}\\\\n\" --max-time 25 \"https://kindloop-delta.vercel.app/g/does-not-exist\")",
+      "Bash(curl -s -o /dev/null -w \"/g/seed-love-letter -> %{http_code}\\\\n\" --max-time 25 \"https://kindloop-delta.vercel.app/g/seed-love-letter\")",
+      "Bash(curl -s -o /dev/null -w \"/api/auth/providers -> %{http_code}\\\\n\" --max-time 25 \"https://kindloop-delta.vercel.app/api/auth/providers\")",
+      "Bash(curl -s --max-time 25 \"https://kindloop-delta.vercel.app/api/auth/providers\")",
+      "Bash(curl -s -o /dev/null -w \"/api/auth/csrf -> %{http_code}\\\\n\" --max-time 25 \"https://kindloop-delta.vercel.app/api/auth/csrf\")",
+      "Bash(awk -F= '/^DATABASE_URL/{v=$2; gsub\\(/^[ \"'\\\\'']+/,\"\",v\\); *)",
+      "Bash(grep -vE \"SECURITY WARNING|sslmode|libpq|trace-warnings|next major|prepare for this|current behavior|postgresql.org|^$\")"
     ]
   }
 }
