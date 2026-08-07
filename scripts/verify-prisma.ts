@@ -13,7 +13,10 @@ import { PrismaClient } from "../generated/prisma/client";
  * On failure it prints the error as thrown. Wrapping it in something friendlier
  * would hide the one piece of information worth having.
  */
-const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL?.replace(
+  /([?&]sslmode=)(require|prefer|verify-ca)\b/,
+  "$1verify-full"
+);
 if (!connectionString) {
   console.error("❌ DATABASE_URL is not set. Nothing to connect to.");
   process.exit(1);

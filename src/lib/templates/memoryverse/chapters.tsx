@@ -353,6 +353,17 @@ function VoiceChapter({ chapter, index, total }: KindProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  /*
+   * Why it will not play, when it will not play.
+   *
+   * This used to be `.catch(() => setPlaying(false))` — the button simply did
+   * nothing, and a broken link was indistinguishable from a working one. Almost
+   * every failure here is the same one: the address points at a *page* about the
+   * audio rather than the audio, because that is what a share link is. Saying so
+   * is the difference between a person fixing it in ten seconds and concluding
+   * the feature is broken.
+   */
+  const [problem, setProblem] = useState<string | null>(null);
 
   const toggle = () => {
     const el = audioRef.current;
@@ -360,11 +371,15 @@ function VoiceChapter({ chapter, index, total }: KindProps) {
       setPlaying((v) => !v); // still animates before a file is attached
       return;
     }
+    setProblem(null);
     if (el.paused) {
       void el
         .play()
         .then(() => setPlaying(true))
-        .catch(() => setPlaying(false));
+        .catch(() => {
+          setPlaying(false);
+          setProblem("This recording won't play. The link may point at a page rather than an audio file.");
+        });
     } else {
       el.pause();
       setPlaying(false);
@@ -429,6 +444,15 @@ function VoiceChapter({ chapter, index, total }: KindProps) {
               {chapter.audioLabel}
             </span>
           )}
+          {problem && (
+            <span
+              role="status"
+              className="rounded-lg px-3.5 py-2 text-[12.5px] leading-[1.5]"
+              style={{ background: "rgba(200,102,58,.16)", color: "rgba(244,238,227,.9)" }}
+            >
+              {problem}
+            </span>
+          )}
           <Narration
             text={chapter.description}
             className="flex flex-col gap-3 text-[16px] leading-[1.72]"
@@ -446,6 +470,12 @@ function VoiceChapter({ chapter, index, total }: KindProps) {
                 setPlaying(false);
                 setProgress(0);
               }}
+              /* Fires when the file itself cannot be loaded — a 404, the wrong
+                 content type, a cross-origin refusal. `play()` rejecting does
+                 not always cover it, so both paths are handled. */
+              onError={() =>
+                setProblem("This recording couldn't be loaded. Check the link points straight at an audio file.")
+              }
               onTimeUpdate={(e) => {
                 const el = e.currentTarget;
                 if (el.duration) setProgress((el.currentTime / el.duration) * 100);

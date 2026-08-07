@@ -19,7 +19,10 @@ import { winYouBackDemo } from "../src/lib/templates/win-you-back/demo";
  * Everything is namespaced under `@seed.kindloop.local`, so it is obvious in the
  * database what is sample data and trivial to delete.
  */
-const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL?.replace(
+  /([?&]sslmode=)(require|prefer|verify-ca)\b/,
+  "$1verify-full"
+);
 if (!connectionString) throw new Error("DATABASE_URL is not set.");
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });

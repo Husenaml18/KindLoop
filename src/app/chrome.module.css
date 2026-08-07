@@ -181,8 +181,17 @@
 
 /* ---------- the menu it opens ---------- */
 
+/*
+ * Above everything, and it has to be said explicitly.
+ *
+ * The menu had no `z-index`, so it sat at the base level and any later sibling
+ * that made its own stacking context painted straight over it — on the create
+ * screen the live preview panel sliced it in half. A dropdown is by definition
+ * the frontmost thing on the page while it is open.
+ */
 .menu {
   position: absolute;
+  z-index: 80;
   right: 0;
   top: calc(100% + 10px);
   min-width: 224px;
@@ -677,3 +686,12 @@
   color: inherit;
   padding: 0 1px;
 }
+
+/* The legal links in the footer's base line. Quiet, but not hidden — a policy
+   nobody can find is a policy nobody agreed to. */
+.footerBaseLink {
+  color: var(--cream-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.footerBaseLink:hover { color: var(--rust); }

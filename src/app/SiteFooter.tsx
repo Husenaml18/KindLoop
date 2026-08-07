@@ -134,12 +134,19 @@ export function SiteFooter({ waitlist = true }: { waitlist?: boolean }) {
 
         <div className={styles.footerBase}>
           <span>© {year} Kindloop</span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <span
-              aria-hidden
-              style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--rust)" }}
-            />
-            Private by default
+
+          <span style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 18px" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <span
+                aria-hidden
+                style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--rust)" }}
+              />
+              Private by default
+            </span>
+            {/* Findable without hunting, which is most of what a legal link is for. */}
+            <Link href="/legal/terms" className={styles.footerBaseLink}>Terms</Link>
+            <Link href="/legal/privacy" className={styles.footerBaseLink}>Privacy</Link>
+            <Link href="/legal/cookies" className={styles.footerBaseLink}>Cookies</Link>
           </span>
         </div>
       </footer>

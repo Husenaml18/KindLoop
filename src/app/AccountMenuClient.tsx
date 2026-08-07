@@ -50,7 +50,10 @@ export function AccountMenuClient({
   return (
     <div
       ref={wrapRef}
-      style={{ position: "relative" }}
+      /* Lifted only while open. A permanent z-index here would make this a
+         stacking context on every page for the sake of a menu that is usually
+         shut. */
+      style={{ position: "relative", zIndex: open ? 80 : undefined }}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) setOpen(false);
       }}

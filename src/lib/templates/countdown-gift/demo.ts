@@ -1,11 +1,11 @@
-import type { CountdownContent } from "./schema";
+import { countdownContentSchema, type CountdownContent } from "./schema";
 
 /**
  * The public walkthrough. There is deliberately **no** `startDate`: a demo whose
  * doors were mostly locked would show a visitor almost nothing, so here every
  * door is open and the calendar reads as a finished object.
  */
-export const countdownGiftDemo: CountdownContent = {
+export const countdownGiftDemo: CountdownContent = countdownContentSchema.parse({
   skin: "midnight",
   doorStyle: "envelope",
   title: "Twelve days until you're home",
@@ -201,4 +201,4 @@ export const countdownGiftDemo: CountdownContent = {
       scratchPrize: "",
     },
   ],
-};
+});

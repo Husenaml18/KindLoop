@@ -506,21 +506,47 @@ export function MemoryverseEditor({
                       onClear={() => patchChapter(selected, { imageUrl: "" })}
                     />
                   )}
+                  {/* Upload first, paste second. A URL only works if it points
+                      straight at a media file; the share link people actually
+                      have to hand — Drive, Dropbox, a Spotify page — is an HTML
+                      page, and a browser cannot play one of those. */}
                   {current.kind === "video" && (
-                    <Text
-                      label="Video URL"
-                      value={current.videoUrl}
-                      onChange={(v) => patchChapter(selected, { videoUrl: v })}
-                      placeholder="https://…/clip.mp4"
-                    />
+                    <>
+                      <UploadRow
+                        label="Video file (up to 80 MB)"
+                        accept="video/*"
+                        url={current.videoUrl}
+                        onUpload={async (f) => {
+                          const url = await uploadPhoto(f);
+                          if (url) patchChapter(selected, { videoUrl: url });
+                        }}
+                        onClear={() => patchChapter(selected, { videoUrl: "" })}
+                      />
+                      <Text
+                        label="…or paste a direct video link"
+                        value={current.videoUrl}
+                        onChange={(v) => patchChapter(selected, { videoUrl: v })}
+                        placeholder="https://…/clip.mp4"
+                      />
+                    </>
                   )}
                   {current.kind === "voice" && (
                     <>
+                      <UploadRow
+                        label="Voice note (up to 20 MB)"
+                        accept="audio/*"
+                        url={current.audioUrl}
+                        onUpload={async (f) => {
+                          const url = await uploadPhoto(f);
+                          if (url) patchChapter(selected, { audioUrl: url });
+                        }}
+                        onClear={() => patchChapter(selected, { audioUrl: "" })}
+                      />
                       <Text
-                        label="Audio URL"
+                        label="…or paste a direct audio link"
                         value={current.audioUrl}
                         onChange={(v) => patchChapter(selected, { audioUrl: v })}
-                        placeholder="https://…/voice.mp3"
+                        placeholder="https://…/voice.mp3 — must end in a file, not a share page"
                       />
                       <Text
                         label="Audio caption"

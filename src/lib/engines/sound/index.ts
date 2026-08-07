@@ -227,10 +227,25 @@ export function useAmbientSound(opts?: { notesEvery?: number; gain?: number }): 
     void n.ctx.resume();
     setOn((was) => {
       const next = !was;
-      /* Ramped, so it fades in rather than arriving. */
+      /* Ramped, so it fades in rather than arriving. Faster on the way up than it
+         used to be: at 1.6s the acknowledgement note below was still climbing out
+         of silence when it finished, which is indistinguishable from nothing. */
       n.master.gain.cancelScheduledValues(n.ctx.currentTime);
       n.master.gain.setValueAtTime(n.master.gain.value, n.ctx.currentTime);
-      n.master.gain.linearRampToValueAtTime(next ? gain : 0, n.ctx.currentTime + (next ? 1.6 : 0.8));
+      n.master.gain.linearRampToValueAtTime(next ? gain : 0, n.ctx.currentTime + (next ? 0.7 : 0.8));
+
+      /*
+       * Say something immediately.
+       *
+       * Turning sound on has to make a sound — that note *is* the confirmation
+       * the button worked. Without it the first thing you hear is whenever the
+       * slow figure next comes round, and somebody who hears nothing for six
+       * seconds has already decided the feature is broken and turned it off.
+       *
+       * Struck directly rather than through `note()`, whose `on` is the stale
+       * value from this render and would refuse.
+       */
+      if (next) strike(n, NOTES[2], n.ctx.currentTime + 0.12, 0.42);
       return next;
     });
   }, [graph, gain]);
@@ -263,7 +278,15 @@ export function useAmbientSound(opts?: { notesEvery?: number; gain?: number }): 
      keeps it from turning into a loop you notice. */
   useEffect(() => {
     if (!on) return;
-    let step = 0;
+    /*
+     * Starts at 1, not 0.
+     *
+     * `seeded(0)` is 0.026 — below the silence threshold — and `step` began at 0
+     * every time, so the first interval after switching on was *deterministically*
+     * quiet for everybody. The unevenness meant to make this feel natural instead
+     * guaranteed the worst case.
+     */
+    let step = 1;
     const id = setInterval(() => {
       const n = nodesRef.current;
       if (!n) return;

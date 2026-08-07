@@ -75,6 +75,8 @@ export const daySchema = z.object({
 
   /** Scratch-card days hide their message until it's been scratched off. */
   scratchPrize: z.string().max(300).default(""),
+
+  openAt: z.string().max(40).default(""),
 });
 
 export type CountdownDay = z.infer<typeof daySchema>;
@@ -113,25 +115,39 @@ export function makeDay(id: string, kind: GiftKind = "photo"): CountdownDay {
 /* The calendar's arithmetic — the Unlock Engine does the work          */
 /* ------------------------------------------------------------------ */
 
-/** When door `index` (0-based) becomes openable. */
+
 export function unlockAt(content: CountdownContent, index: number): number {
+  const own = content.days[index]?.openAt?.trim();
+  if (own) {
+    const t = new Date(own).getTime();
+    if (!Number.isNaN(t)) return t;
+  }
   return dayUnlockAt(content.startDate, index);
 }
 
-/**
- * How many doors are open right now. Recipients cannot skip: a door is only
- * available once its own midnight has passed.
- */
+export function openStates(content: CountdownContent, now: number): boolean[] {
+  const hasCalendar = content.startDate.trim().length > 0;
+  return content.days.map((day, i) => {
+    const own = day.openAt?.trim();
+    if (own) {
+      const t = new Date(own).getTime();
+      if (!Number.isNaN(t)) return now >= t;
+    }
+    if (!hasCalendar) return true;
+    return now >= dayUnlockAt(content.startDate, i);
+  });
+}
+
+/** How many are open. Kept for the copy that counts them. */
 export function openedCount(content: CountdownContent, now: number): number {
+  if (content.days.some((d) => d.openAt?.trim())) {
+    return openStates(content, now).filter(Boolean).length;
+  }
   return openedByDay(content.startDate, content.days.length, now);
 }
 
 export { remainingUntil, type Remaining };
 
-/**
- * The nudge a locked door gives back — warmer the closer it is, because waiting
- * is meant to be part of the gift.
- */
 export const encouragement = encouragementFor;
 
 export const emptyCountdownContent: CountdownContent = countdownContentSchema.parse({

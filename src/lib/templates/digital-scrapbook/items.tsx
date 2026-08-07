@@ -736,6 +736,26 @@ function Scrap({ item, t }: { item: ScrapItem; t: PageTheme }) {
 
 /* ------------------------------------------------------------------ */
 
+/**
+ * A piece's artwork on its own, with no positioning of its own.
+ *
+ * Exported because the editor needs exactly this and nothing else. `ScrapItemView`
+ * places itself absolutely, so nesting it inside the editor's own positioned
+ * wrapper took it out of flow and collapsed that wrapper to a few pixels tall —
+ * the artwork was painted outside the box that receives the clicks, which is why
+ * pieces could not be grabbed. The reader view keeps `ScrapItemView`; the editor
+ * lays out its own box and puts the body inside it.
+ */
+export function ScrapItemBody({ item, t }: { item: ScrapItem; t: PageTheme }) {
+  /* Opacity lives on the view in the reader; in the editor the wrapper is the
+     view, so the body carries it instead. */
+  return (
+    <div style={{ opacity: item.opacity }}>
+      <Inner item={item} t={t} />
+    </div>
+  );
+}
+
 function Inner({ item, t }: { item: ScrapItem; t: PageTheme }) {
   switch (item.kind) {
     case "photo":
@@ -819,7 +839,20 @@ export function ScrapItemView({
         zIndex: item.z,
         translateX: "-50%",
         translateY: "-50%",
-        rotate: item.rotate + wobble(item.id, 0.9),
+        /*
+         * The angle as laid out, and nothing added to it.
+         *
+         * This used to add `wobble(item.id, 0.9)` — a per-piece nudge of up to
+         * about a degree, meant to keep a page from looking mechanically
+         * aligned. The editor has no such nudge, so every piece sat at a
+         * slightly different angle in the preview than the one it was placed
+         * at, and a piece deliberately squared to an edge came out crooked. A
+         * hand-made feel that the person doing the hand-making cannot see or
+         * correct is just a discrepancy. Anyone who wants the tilt can drag the
+         * rotate grip, which now exists.
+         */
+        rotate: item.rotate,
+        opacity: item.opacity,
         cursor: openable ? "pointer" : "default",
       }}
       initial={reduced ? { opacity: 1 } : { opacity: 0, y: -10, scale: 0.97 }}

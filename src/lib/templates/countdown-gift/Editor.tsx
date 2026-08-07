@@ -477,6 +477,45 @@ export function CountdownGiftEditor({
                   </label>
                 )}
 
+                {/*
+                  * When this one door opens.
+                  *
+                  * Offered per door rather than as one global rule, because the
+                  * reason anybody wants it is specific: the last door at 7pm on
+                  * the actual birthday, the proposal one at the hour it happened.
+                  */}
+                <label className="block">
+                  <span className="mb-1.5 block" style={label}>This door opens</span>
+                  <input
+                    type="datetime-local"
+                    value={current.openAt}
+                    onChange={(e) => patchDay(current.id, { openAt: e.target.value })}
+                    className={field}
+                    style={fieldStyle}
+                  />
+                  <span className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px]" style={{ color: SOFT }}>
+                    {current.openAt ? (
+                      <>
+                        <span>Locked until then, to the minute — the calendar is ignored for this one.</span>
+                        <button
+                          type="button"
+                          onClick={() => patchDay(current.id, { openAt: "" })}
+                          className="cursor-pointer rounded-full px-2.5 py-1"
+                          style={{ background: "rgba(0,0,0,.05)", border: `1px solid ${EDGE}`, color: INK }}
+                        >
+                          Back to the calendar
+                        </button>
+                      </>
+                    ) : (
+                      <span>
+                        {value.startDate
+                          ? `Following the calendar: day ${selected + 1}. Set a time here to override it.`
+                          : "No schedule at all, so this opens straight away. Set a time to make them wait."}
+                      </span>
+                    )}
+                  </span>
+                </label>
+
                 {current.kind === "illustration" && (
                   <label className="block">
                     <span className="mb-1.5 block" style={label}>Drawing</span>

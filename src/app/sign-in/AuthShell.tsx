@@ -39,8 +39,9 @@ export function AuthShell({ children }: { children: ReactNode }) {
         </div>
 
         <p className={`m-0 ${styles.foot}`}>
-          By signing in you agree to our <Link href="/faq">terms</Link>. Whoever you
-          send a gift to never needs an account.
+          By signing in you agree to our <Link href="/legal/terms">terms</Link> and{" "}
+          <Link href="/legal/privacy">privacy policy</Link>. Whoever you send a gift
+          to never needs an account.
         </p>
       </div>
 

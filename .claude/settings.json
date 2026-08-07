@@ -30,7 +30,18 @@
       "Bash(curl -s --max-time 25 \"https://kindloop-delta.vercel.app/api/auth/providers\")",
       "Bash(curl -s -o /dev/null -w \"/api/auth/csrf -> %{http_code}\\\\n\" --max-time 25 \"https://kindloop-delta.vercel.app/api/auth/csrf\")",
       "Bash(awk -F= '/^DATABASE_URL/{v=$2; gsub\\(/^[ \"'\\\\'']+/,\"\",v\\); *)",
-      "Bash(grep -vE \"SECURITY WARNING|sslmode|libpq|trace-warnings|next major|prepare for this|current behavior|postgresql.org|^$\")"
+      "Bash(grep -vE \"SECURITY WARNING|sslmode|libpq|trace-warnings|next major|prepare for this|current behavior|postgresql.org|^$\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\);const a={...p.dependencies,...p.devDependencies};console.log\\(Object.keys\\(a\\).filter\\(k=>/analytic|gtag|segment|posthog|sentry|mixpanel|speed-insights|vercel/i.test\\(k\\)\\).join\\(', '\\)||'none'\\)\")",
+      "Bash(grep -vE \"react.dev|prisma.io|github|myaccount.google|console.cloud|resend.com/?$\")",
+      "Bash(awk '{print \"  \" $1, $2}')",
+      "Bash(node shot.mjs http://localhost:3000/legal/cookies legal-cookies.png)",
+      "Read(//home/husena/Projects/**)",
+      "Bash(sed -n '/selected && \\(/,/^ \\)/p' src/lib/templates/digital-scrapbook/Editor.tsx)",
+      "Bash(awk '/\\\\{selected && \\\\\\(/,/^                  <\\\\/div>/' src/lib/templates/digital-scrapbook/Editor.tsx)",
+      "Bash(curl -s http://localhost:3000/sign-in)",
+      "Bash(awk 'NR>=890 && NR<=900' src/lib/templates/digital-scrapbook/Editor.tsx)",
+      "Bash(ip -4 addr show scope global)",
+      "Bash(awk '/inet /{print \"  \" $2, \"on\", $NF}')"
     ]
   }
 }

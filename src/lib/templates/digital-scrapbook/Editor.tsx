@@ -7,6 +7,7 @@ import {
   DECOR_KINDS,
   DOODLE_SHAPES,
   ITEM_KINDS,
+  ITEM_DEFAULTS,
   ITEM_LABELS,
   makeItem,
   spreadSchema,
@@ -15,7 +16,7 @@ import {
   type ScrapItem,
 } from "./schema";
 import { PAGE_THEMES, THEME_IDS, getTheme, PAPER_GRAIN } from "./theme";
-import { ScrapItemView } from "./items";
+import { ScrapItemBody } from "./items";
 import { CraftDrawer, DragGhost } from "./CraftDrawer";
 import { DigitalScrapbookView } from "./View";
 
@@ -36,6 +37,24 @@ const KIND_GLYPH: Record<ItemKind, string> = {
 };
 
 const CONTENT_KINDS = ITEM_KINDS.filter((k) => !DECOR_KINDS.includes(k));
+
+/**
+ * The swatches offered before the full picker.
+ *
+ * Drawn from the papers and inks the book already uses rather than a generic
+ * rainbow: the common case is wanting a piece to match the page it is on, and
+ * a spectrum makes that the one thing that is hard to do.
+ */
+const PALETTE: string[] = [
+  "#a8663c",
+  "#c9825a",
+  "#e8b26a",
+  "#7d8f5a",
+  "#6a8fa8",
+  "#b5666f",
+  "#4a3c2c",
+  "#fffdf6",
+];
 
 const label: CSSProperties = {
   fontFamily: "var(--font-ibm-plex-mono), monospace",
@@ -184,6 +203,25 @@ export function DigitalScrapbookEditor({
     return `it-${n}`;
   };
 
+  /**
+   * Turn a placed piece into a different kind of piece.
+   *
+   * Deliberately patches only `kind`. Position, rotation, size, stacking and
+   * every content field are left exactly as they are — a photo that becomes a
+   * polaroid keeps its photograph, a note that becomes a sticky keeps its words.
+   * The one concession is filling in the new kind's placeholder text when the
+   * item has none, so a decoration turning into a note is not silently blank.
+   */
+  const changeKind = (id: string, kind: ItemKind) => {
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
+    const fallbackText = ITEM_DEFAULTS[kind]?.text;
+    patchItem(id, {
+      kind,
+      ...(!item.text && fallbackText ? { text: fallbackText } : {}),
+    });
+  };
+
   const addItem = (kind: ItemKind, at?: { x: number; y: number }, color?: string) => {
     if (!spread) return;
     const id = freshItemId();
@@ -250,13 +288,59 @@ export function DigitalScrapbookEditor({
   };
 
   /* ---- dragging on the canvas ---- */
-  const dragState = useRef<{ id: string; mode: "move" | "size"; startW: number; startX: number } | null>(null);
+  const dragState = useRef<{
+    id: string;
+    mode: "move" | "size" | "rotate";
+    startW: number;
+    startX: number;
+    /* Rotating needs the piece's centre in page pixels and the angle the pointer
+       started at, so the piece turns *with* the hand rather than snapping its
+       top edge to wherever the cursor happens to be. */
+    cx: number;
+    cy: number;
+    startAngle: number;
+    startRotate: number;
+    /* Where the gesture began, and whether it has travelled far enough to count
+       as a drag rather than a click. */
+    startClientY: number;
+    armed: boolean;
+  } | null>(null);
 
-  const onItemPointerDown = (e: React.PointerEvent, item: ScrapItem, mode: "move" | "size") => {
+  /* Below this, a gesture is a click. Four pixels is about the wobble of a
+     deliberate press — enough that selecting something cannot nudge it, small
+     enough that a real drag still feels immediate. */
+  const DRAG_THRESHOLD = 4;
+
+  const onItemPointerDown = (
+    e: React.PointerEvent,
+    item: ScrapItem,
+    mode: "move" | "size" | "rotate",
+    /* Grips mean it: no threshold, the drag starts on contact. */
+    viaGrip = false
+  ) => {
     if (item.locked) return;
     e.stopPropagation();
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-    dragState.current = { id: item.id, mode, startW: item.w, startX: e.clientX };
+
+    /* The wrapper, whichever handle was grabbed. */
+    const box = (e.currentTarget as HTMLElement).closest<HTMLElement>("[data-piece]")
+      ?? (e.currentTarget as HTMLElement);
+    const r = box.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+
+    dragState.current = {
+      id: item.id,
+      mode,
+      startW: item.w,
+      startX: e.clientX,
+      cx,
+      cy,
+      startAngle: (Math.atan2(e.clientY - cy, e.clientX - cx) * 180) / Math.PI,
+      startRotate: item.rotate,
+      startClientY: e.clientY,
+      armed: viaGrip || mode !== "move",
+    };
     setSelectedId(item.id);
   };
 
@@ -266,6 +350,19 @@ export function DigitalScrapbookEditor({
     if (!drag || !rect) return;
 
     if (drag.mode === "move") {
+      /*
+       * A click must not move anything.
+       *
+       * Selecting a piece and dragging it were the same gesture, so the act of
+       * choosing something nudged it a pixel or two — invisible while you are
+       * doing it, and permanent. The drag only starts once the pointer has
+       * genuinely travelled.
+       */
+      if (!drag.armed) {
+        const travelled = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startClientY);
+        if (travelled < DRAG_THRESHOLD) return;
+        drag.armed = true;
+      }
       let x = ((e.clientX - rect.left) / rect.width) * 100;
       let y = ((e.clientY - rect.top) / rect.height) * 100;
       const nearV = Math.abs(x - 50) < 1.6;
@@ -278,9 +375,23 @@ export function DigitalScrapbookEditor({
       }
       setGuides({ v: nearV, h: nearH });
       patchItem(drag.id, { x: Math.max(-15, Math.min(115, x)), y: Math.max(-15, Math.min(115, y)) }, true);
-    } else {
+    } else if (drag.mode === "size") {
       const delta = ((e.clientX - drag.startX) / rect.width) * 100;
       patchItem(drag.id, { w: Math.max(3, Math.min(96, drag.startW + delta * 2)) }, true);
+    } else if (drag.mode === "rotate") {
+      const angle = (Math.atan2(e.clientY - drag.cy, e.clientX - drag.cx) * 180) / Math.PI;
+      let next = drag.startRotate + (angle - drag.startAngle);
+      /* Wrapped into the range the schema accepts, or a couple of full turns
+         would silently clamp at ±180 and the piece would stop following. */
+      next = ((((next + 180) % 360) + 360) % 360) - 180;
+      /* Snap to the straight angles when close, the way the move drag snaps to
+         the centre lines — holding Shift is the usual gesture but there is no
+         keyboard on a phone. */
+      if (snap) {
+        const near = [-180, -135, -90, -45, 0, 45, 90, 135, 180].find((a) => Math.abs(next - a) < 4);
+        if (near !== undefined) next = near;
+      }
+      patchItem(drag.id, { rotate: Math.round(next) }, true);
     }
   };
 
@@ -527,6 +638,7 @@ export function DigitalScrapbookEditor({
               {items.map((item) => (
                 <div
                   key={item.id}
+                  data-piece={item.id}
                   onPointerDown={(e) => onItemPointerDown(e, item, "move")}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -544,19 +656,93 @@ export function DigitalScrapbookEditor({
                     outlineOffset: 3,
                   }}
                 >
+                  {/*
+                    * The artwork, in flow, so the wrapper takes its real height.
+                    *
+                    * This used to nest `ScrapItemView`, which positions itself
+                    * absolutely — inside this already-positioned wrapper that
+                    * took it out of flow and left the wrapper about eight pixels
+                    * tall. The piece you could see was painted outside the box
+                    * that receives pointer events, so dragging and even selecting
+                    * missed almost everywhere you clicked.
+                    *
+                    * `pointer-events-none` stays: the wrapper owns the gesture,
+                    * and a child stealing pointerdown is how a drag turns into a
+                    * text selection halfway through.
+                    */}
                   <div className="pointer-events-none">
-                    <ScrapItemView item={{ ...item, x: 50, y: 50, w: 100, rotate: 0 }} theme={theme} />
+                    <ScrapItemBody item={item} t={theme} />
                   </div>
                   {selectedId === item.id && !item.locked && (
-                    <span
-                      onPointerDown={(e) => onItemPointerDown(e, item, "size")}
-                      role="slider"
-                      aria-label="Resize"
-                      aria-valuenow={Math.round(item.w)}
-                      tabIndex={0}
-                      className="absolute -bottom-2 -right-2 h-4 w-4 cursor-ew-resize rounded-full"
-                      style={{ background: "#a8663c", border: "2px solid #fffdf6" }}
-                    />
+                    <>
+                      <span
+                        onPointerDown={(e) => onItemPointerDown(e, item, "size")}
+                        role="slider"
+                        aria-label="Resize"
+                        aria-valuenow={Math.round(item.w)}
+                        tabIndex={0}
+                        className="absolute -bottom-2 -right-2 h-4 w-4 cursor-ew-resize rounded-full"
+                        style={{ background: "#a8663c", border: "2px solid #fffdf6" }}
+                      />
+
+                      {/*
+                        * The move grip.
+                        *
+                        * Dragging the piece itself still works, but only past a
+                        * few pixels of travel — this is the unambiguous target
+                        * for anyone who would rather not risk it, and the one
+                        * that starts moving on contact.
+                        */}
+                      <span
+                        onPointerDown={(e) => onItemPointerDown(e, item, "move", true)}
+                        role="button"
+                        aria-label="Move"
+                        tabIndex={0}
+                        title="Drag to move"
+                        className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full text-[10px] leading-none"
+                        style={{
+                          background: "#a8663c",
+                          border: "2px solid #fffdf6",
+                          color: "#fffdf6",
+                          cursor: "grab",
+                        }}
+                      >
+                        ✥
+                      </span>
+
+                      {/*
+                        * The rotation grip, on a stalk above the piece.
+                        *
+                        * Held off the corner deliberately: a handle sitting on
+                        * the edge competes with the resize dot, and the further
+                        * from the centre it is the finer the control — a short
+                        * arm makes a small hand movement a large angle.
+                        */}
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute -top-6 left-1/2 w-px -translate-x-1/2"
+                        style={{ height: 22, background: "rgba(168,102,60,.55)" }}
+                      />
+                      <span
+                        onPointerDown={(e) => onItemPointerDown(e, item, "rotate")}
+                        role="slider"
+                        aria-label="Rotate"
+                        aria-valuenow={Math.round(item.rotate)}
+                        aria-valuemin={-180}
+                        aria-valuemax={180}
+                        tabIndex={0}
+                        title="Drag to rotate"
+                        className="absolute -top-9 left-1/2 flex h-5 w-5 -translate-x-1/2 items-center justify-center rounded-full text-[10px] leading-none"
+                        style={{
+                          background: "#fffdf6",
+                          border: "2px solid #a8663c",
+                          color: "#a8663c",
+                          cursor: "grab",
+                        }}
+                      >
+                        ⟳
+                      </span>
+                    </>
                   )}
                 </div>
               ))}
@@ -674,6 +860,39 @@ export function DigitalScrapbookEditor({
                       </Btn>
                     </div>
 
+                    {/*
+                      * Change what it is, without losing where it is.
+                      *
+                      * Until now the only way to turn a sticky note into a
+                      * polaroid was to delete it and place a new one — which
+                      * threw away the position, angle, size and stacking order
+                      * that were the actual work. Every field lives on one item
+                      * schema, so swapping the kind is a one-property patch and
+                      * everything else survives untouched.
+                      */}
+                    <details>
+                      <summary
+                        className="cursor-pointer list-none"
+                        style={{ ...label, color: INK_SOFT }}
+                      >
+                        Change it to…
+                      </summary>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {ITEM_KINDS.filter((k) => k !== selected.kind).map((k) => (
+                          <button
+                            key={k}
+                            type="button"
+                            onClick={() => changeKind(selected.id, k)}
+                            title={ITEM_LABELS[k]}
+                            className="cursor-pointer rounded-md px-2 py-1.5 text-[13px] leading-none"
+                            style={{ background: "rgba(0,0,0,.04)", border: `1px solid ${CARD_EDGE}` }}
+                          >
+                            {KIND_GLYPH[k]}
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+
                     <label className="block">
                       <span className="mb-1 block" style={label}>Rotation · {Math.round(selected.rotate)}°</span>
                       <input type="range" min={-180} max={180} value={selected.rotate} onChange={(e) => patchItem(selected.id, { rotate: Number(e.target.value) }, true)} onPointerUp={endDrag} className="w-full accent-[#a8663c]" />
@@ -724,10 +943,72 @@ export function DigitalScrapbookEditor({
                         </select>
                       </label>
                     )}
+                    {/*
+                      * Colour, picked rather than typed.
+                      *
+                      * It was a free-text box, which meant knowing hex by heart
+                      * and getting no feedback until you looked at the page. The
+                      * swatches come first because they are the theme's own
+                      * palette — the answer most of the time — with the native
+                      * picker behind them for anything else, and a way back to
+                      * "let the style decide", which typing cannot express.
+                      */}
+                    <div className="block">
+                      <span className="mb-1 block" style={label}>
+                        Colour {selected.color ? "" : "· following the style"}
+                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {PALETTE.map((sw) => (
+                          <button
+                            key={sw}
+                            type="button"
+                            aria-label={`Use ${sw}`}
+                            onClick={() => patchItem(selected.id, { color: sw })}
+                            className="h-6 w-6 cursor-pointer rounded-full"
+                            style={{
+                              background: sw,
+                              border: selected.color.toLowerCase() === sw ? "2px solid #a8663c" : `1px solid ${CARD_EDGE}`,
+                              boxShadow: selected.color.toLowerCase() === sw ? "0 0 0 2px rgba(168,102,60,.22)" : "none",
+                            }}
+                          />
+                        ))}
+
+                        <label
+                          className="flex h-6 cursor-pointer items-center gap-1.5 rounded-full px-2"
+                          style={{ border: `1px solid ${CARD_EDGE}` }}
+                          title="Any colour"
+                        >
+                          <input
+                            type="color"
+                            value={/^#[0-9a-f]{6}$/i.test(selected.color) ? selected.color : "#a8663c"}
+                            onChange={(e) => patchItem(selected.id, { color: e.target.value }, true)}
+                            onBlur={endDrag}
+                            className="h-4 w-4 cursor-pointer border-0 bg-transparent p-0"
+                          />
+                          <span className="text-[10px]" style={{ color: INK_SOFT }}>Custom</span>
+                        </label>
+
+                        {selected.color && (
+                          <Btn onClick={() => patchItem(selected.id, { color: "" })}>Clear</Btn>
+                        )}
+                      </div>
+                    </div>
+
                     <label className="block">
-                      <span className="mb-1 block" style={label}>Colour override</span>
-                      <input type="text" value={selected.color} onChange={(e) => patchItem(selected.id, { color: e.target.value })} placeholder="leave empty to follow the style" className={fieldCls} style={fieldStyle} />
+                      <span className="mb-1 block" style={label}>
+                        Transparency · {Math.round((1 - selected.opacity) * 100)}%
+                      </span>
+                      <input
+                        type="range"
+                        min={15}
+                        max={100}
+                        value={Math.round(selected.opacity * 100)}
+                        onChange={(e) => patchItem(selected.id, { opacity: Number(e.target.value) / 100 }, true)}
+                        onPointerUp={endDrag}
+                        className="w-full accent-[#a8663c]"
+                      />
                     </label>
+
 
                     <div className="flex flex-wrap gap-1.5">
                       <Btn onClick={() => layer(selected.id, 1)} title="Bring forward">↑ Forward</Btn>

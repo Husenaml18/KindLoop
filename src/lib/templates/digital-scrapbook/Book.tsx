@@ -162,7 +162,7 @@ export function Book({
       turnTimer.current = setTimeout(() => {
         setTurning(null);
         busy.current = false;
-      }, 1150);
+      }, 1100);
     },
     [index, total, reduced, onReachedEnd]
   );
@@ -198,6 +198,10 @@ export function Book({
 
   /* The faces of the leaf in flight. Turning forward, the leaf's front is the
      page we're leaving and its back is the page arriving underneath. */
+  /* The faces of the leaf in flight. Turning forward, the leaf's front is the
+     page we're leaving and its back is the page arriving underneath. Safe to
+     resolve to null when the turn ends: the leaf now exits instantly, so it is
+     removed in the same commit rather than lingering with nothing to show. */
   const leafFront = turning ? (turning.dir === 1 ? spreads[turning.from] : spreads[turning.from - 1]) : null;
   const leafBack = turning ? (turning.dir === 1 ? spreads[turning.from + 1] : spreads[turning.from]) : null;
 
@@ -270,7 +274,18 @@ export function Book({
                     }}
                     initial={{ rotateY: 0 }}
                     animate={{ rotateY: turning.dir === 1 ? -178 : 178 }}
-                    exit={{ opacity: 0 }}
+                    /*
+                     * Gone at once, not faded.
+                     *
+                     * `exit` shared the 1.1s transition below, so when the turn
+                     * finished the leaf spent another *whole second* fading out
+                     * on top of the page that had already arrived — the flicker
+                     * where the old page seems to come back before the new one
+                     * settles. The sheet underneath is already showing the new
+                     * spread by then, so there is nothing to reveal gently: the
+                     * leaf has finished its job and should stop existing.
+                     */
+                    exit={{ opacity: 0, transition: { duration: 0 } }}
                     transition={{ duration: 1.1, ease: [0.42, 0.03, 0.24, 1] }}
                   >
                     {/* front of the leaf */}
@@ -353,29 +368,94 @@ export function Book({
             </>
           )}
 
-          {/* corner that curls when you're about to turn */}
+          {/*
+            The corner you lift to turn the page.
+
+            This was a flat triangle that rotated sixteen degrees — a shape
+            spinning in the plane of the page, which reads as a graphic moving
+            rather than paper lifting. Real paper hinges along the diagonal and
+            comes *off* the sheet toward you, so this does that: a perspective on
+            the container, and the flap rotated about the (1,-1,0) axis through
+            the corner itself.
+
+            Three things sell it beyond the rotation. The underside is its own
+            face in a warmer, darker stock, revealed as the corner comes over.
+            The shadow it casts onto the page grows and softens as it lifts,
+            which is what gives the corner height. And the whole peel gets
+            larger, because a corner curling toward you covers more of the page.
+          */}
           {!reduced && !showSingle && index < total - 1 && (
             <motion.button
               type="button"
               onClick={() => turn(1)}
               aria-label="Turn the page"
               className="absolute bottom-0 right-0 z-[47] cursor-pointer border-0 bg-transparent p-0"
-              style={{ width: "9%", aspectRatio: "1" }}
+              style={{ width: "14%", aspectRatio: "1", perspective: 620 }}
               initial="rest"
               whileHover="lift"
+              whileFocus="lift"
+              animate="rest"
               variants={{ rest: {}, lift: {} }}
             >
+              {/* the shadow the lifted corner drops onto the page below it */}
+              <motion.span
+                aria-hidden
+                className="absolute bottom-0 right-0"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
+                  background: "rgba(58,40,22,.34)",
+                  filter: "blur(7px)",
+                  transformOrigin: "100% 100%",
+                }}
+                variants={{
+                  rest: { opacity: 0, scale: 0.6, x: 0, y: 0 },
+                  lift: { opacity: 0.5, scale: 0.86, x: -7, y: -7 },
+                }}
+                transition={{ type: "spring", stiffness: 180, damping: 22 }}
+              />
+
+              {/* the flap itself, hinged on the corner's diagonal */}
               <motion.span
                 aria-hidden
                 className="absolute bottom-0 right-0 h-full w-full"
                 style={{
-                  background: `linear-gradient(315deg, ${theme.paperEdge} 0%, ${theme.paper} 48%, transparent 52%)`,
-                  boxShadow: "-3px -3px 8px rgba(58,40,22,.25)",
                   transformOrigin: "100% 100%",
+                  transformStyle: "preserve-3d",
                 }}
-                variants={{ rest: { rotate: 0, opacity: 0.55 }, lift: { rotate: -16, opacity: 1 } }}
-                transition={{ type: "spring", stiffness: 220, damping: 20 }}
-              />
+                /* A diagonal hinge, expressed as the two axes Framer animates.
+                   Lifting the bottom edge and the right edge together is the
+                   same motion as folding about the corner's diagonal, and it
+                   composes without a transform string that would fight the
+                   spring. */
+                variants={{
+                  rest: { rotateX: -4, rotateY: 4, scale: 0.62 },
+                  lift: { rotateX: -72, rotateY: 72, scale: 1 },
+                }}
+                transition={{ type: "spring", stiffness: 150, damping: 19, mass: 0.7 }}
+              >
+                {/* the face that is the page, seen until it folds over */}
+                <span
+                  className="absolute inset-0"
+                  style={{
+                    clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
+                    background: `linear-gradient(315deg, ${theme.paperEdge} 0%, ${theme.paper} 62%)`,
+                    backfaceVisibility: "hidden",
+                  }}
+                />
+                {/* the underside, which is what you actually see once it curls */}
+                <span
+                  className="absolute inset-0"
+                  style={{
+                    clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
+                    background: `linear-gradient(135deg, ${theme.paper} 0%, ${theme.paperEdge} 78%)`,
+                    transform: "rotateY(180deg)",
+                    backfaceVisibility: "hidden",
+                    boxShadow: "inset 2px 2px 6px rgba(58,40,22,.18)",
+                  }}
+                />
+              </motion.span>
             </motion.button>
           )}
         </div>

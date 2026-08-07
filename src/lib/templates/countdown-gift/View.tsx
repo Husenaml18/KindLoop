@@ -10,7 +10,7 @@ import { MontageCard, Surprise } from "./surprises";
 import {
   CD_FALLBACKS,
   encouragement,
-  openedCount,
+  openStates,
   remainingUntil,
   unlockAt,
   type CountdownContent,
@@ -80,10 +80,6 @@ function Motes({ color }: { color: string }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* The live countdown                                                  */
-/* ------------------------------------------------------------------ */
-
 function Ticker({ target, now, skin }: { target: number; now: number; skin: (typeof SKINS)[keyof typeof SKINS] }) {
   const r = remainingUntil(target, now);
   const cells: [number, string][] = [
@@ -143,33 +139,55 @@ export function CountdownGiftView({
   const now = useClock();
 
   const days = content.days;
-  /** In a preview or demo frame there is no waiting — show the whole calendar. */
-  const opened = embedded ? days.length : now === 0 ? 0 : openedCount(content, now);
+
+  const open = useMemo<boolean[]>(() => {
+    if (embedded) return days.map(() => true);
+    if (now === 0) return days.map(() => false);
+    return openStates(content, now);
+  }, [content, days, now, embedded]);
+
+  const opened = open.filter(Boolean).length;
 
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [seen, setSeen] = useState<Set<number>>(new Set());
   const [nudge, setNudge] = useState<{ text: string; at: number } | null>(null);
   const [finale, setFinale] = useState(false);
   const [music, setMusic] = useState(false);
+  /* Set when they choose to look at the locked calendar early. */
+  const [pastGate, setPastGate] = useState(false);
 
-  /* Whichever door is next. When they're all open, this is the finale instead. */
-  const nextIndex = opened < days.length ? opened : -1;
+  const nextIndex = useMemo(() => {
+    let best = -1;
+    let bestAt = Infinity;
+    open.forEach((isOpen, i) => {
+      if (isOpen) return;
+      const at = unlockAt(content, i);
+      if (at > 0 && at < bestAt) {
+        bestAt = at;
+        best = i;
+      }
+    });
+    return best >= 0 ? best : open.findIndex((o) => !o);
+  }, [open, content]);
+
   const nextUnlock = nextIndex >= 0 ? unlockAt(content, nextIndex) : 0;
-  const hasSchedule = content.startDate.trim().length > 0;
+  const hasSchedule =
+    content.startDate.trim().length > 0 || days.some((d) => d.openAt.trim().length > 0);
   const allOpen = days.length > 0 && opened >= days.length;
 
-  /* Midnight arriving while they're watching deserves an announcement. */
   const [justUnlocked, setJustUnlocked] = useState<number | null>(null);
-  const prevOpened = useRef<number | null>(null);
+  const prevOpen = useRef<boolean[] | null>(null);
   useEffect(() => {
     if (now === 0 || embedded) return;
-    const before = prevOpened.current;
-    prevOpened.current = opened;
-    if (before === null || opened <= before) return;
-    setJustUnlocked(opened - 1);
+    const before = prevOpen.current;
+    prevOpen.current = open;
+    if (!before) return;
+    const flipped = open.findIndex((isOpen, i) => isOpen && !before[i]);
+    if (flipped < 0) return;
+    setJustUnlocked(flipped);
     const id = setTimeout(() => setJustUnlocked(null), 6200);
     return () => clearTimeout(id);
-  }, [opened, now, embedded]);
+  }, [open, now, embedded]);
 
   /* The encouragement fades on its own — it's a reassurance, not a dialog. */
   useEffect(() => {
@@ -192,7 +210,7 @@ export function CountdownGiftView({
   };
 
   const stateOf = (i: number): DoorState =>
-    i >= opened ? "locked" : seen.has(i) ? "opened" : "ready";
+    !open[i] ? "locked" : seen.has(i) ? "opened" : "ready";
 
   const daysAwayOf = (i: number) => {
     if (!hasSchedule || now === 0) return 0;
@@ -209,7 +227,15 @@ export function CountdownGiftView({
     return 6;
   }, [days.length]);
 
-  const openedDays = days.slice(0, opened);
+  /*
+   * Shown only when there is genuinely nothing to open yet: a real schedule, a
+   * real clock reading, and every single door still shut. A preview, a demo, or
+   * a calendar with one door already available all go straight to the board.
+   */
+  const gateOpen =
+    !embedded && !pastGate && now > 0 && hasSchedule && days.length > 0 && opened === 0 && nextUnlock > 0;
+
+  const openedDays = days.filter((_, i) => open[i]);
   const active = openIndex !== null ? days[openIndex] : null;
 
   return (
@@ -227,7 +253,82 @@ export function CountdownGiftView({
         style={{ background: `radial-gradient(ellipse 62% 44% at 50% 40%, ${skin.glow}18, transparent 70%)` }}
       />
 
-      <div className="relative mx-auto flex w-full max-w-4xl flex-col items-center px-5 py-12 sm:px-8 sm:py-16">
+      {/*
+        The doorstep.
+        
+        Arriving before the first door has unlocked, a board of twelve shut doors
+        with a small line of digits above it says "nothing for you yet" — the
+        countdown is the smallest thing on a screen full of things you cannot
+        have. So while every door is still locked, the countdown *is* the page,
+        and the calendar waits behind it.
+        
+        Not a wall: "see the calendar" is always there. Being told to come back
+        later, with no way to look at what you were sent, is the one thing this
+        must never feel like.
+      */}
+      {gateOpen && (
+        <div className="relative mx-auto flex min-h-[inherit] w-full max-w-2xl flex-col items-center justify-center px-6 py-16 text-center">
+          {content.occasion && (
+            <div style={{ fontFamily: MONO_FONT, fontSize: 9.5, letterSpacing: ".3em", textTransform: "uppercase", color: skin.gold }}>
+              counting down to {content.occasion}
+            </div>
+          )}
+
+          <motion.h1
+            className="m-0 mt-5"
+            style={{ fontFamily: NUMERAL_FONT, fontSize: "clamp(30px,5.6vw,56px)", lineHeight: 1.06, color: skin.ink, letterSpacing: "-0.015em" }}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.2, 0.8, 0.2, 1] }}
+          >
+            {content.title || CD_FALLBACKS.title}
+          </motion.h1>
+
+          {(content.dedication || CD_FALLBACKS.dedication) && (
+            <p className="m-0 mx-auto mt-4 max-w-md" style={{ fontFamily: HAND_FONT, fontSize: 20, lineHeight: 1.5, color: skin.inkSoft }}>
+              {content.dedication || CD_FALLBACKS.dedication}
+            </p>
+          )}
+
+          <motion.div
+            className="mt-12"
+            initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.9, delay: reduced ? 0 : 0.35, ease: [0.2, 0.8, 0.2, 1] }}
+          >
+            <Ticker target={nextUnlock} now={now} skin={skin} />
+          </motion.div>
+
+          <div
+            className="mt-6"
+            style={{ fontFamily: MONO_FONT, fontSize: 9.5, letterSpacing: ".2em", textTransform: "uppercase", color: skin.inkSoft }}
+          >
+            until the first door opens
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setPastGate(true)}
+            className="mt-12 cursor-pointer rounded-full px-6 py-3"
+            style={{
+              background: "transparent",
+              border: `1px solid ${skin.boardEdge}`,
+              color: skin.inkSoft,
+              fontFamily: MONO_FONT,
+              fontSize: 10,
+              letterSpacing: ".18em",
+              textTransform: "uppercase",
+            }}
+          >
+            See the calendar
+          </button>
+        </div>
+      )}
+
+      <div
+        className="relative mx-auto flex w-full max-w-4xl flex-col items-center px-5 py-12 sm:px-8 sm:py-16"
+        style={gateOpen ? { display: "none" } : undefined}
+      >
         {/* ---------- the board ---------- */}
         <motion.div
           className="relative w-full"
@@ -481,8 +582,11 @@ export function CountdownGiftView({
                 </span>
                 <button
                   type="button"
-                  onClick={() => openIndex + 1 < opened && openDay(openIndex + 1)}
-                  disabled={openIndex + 1 >= opened}
+                  onClick={() => {
+                    const next = open.findIndex((o, i) => o && i > openIndex);
+                    if (next >= 0) openDay(next);
+                  }}
+                  disabled={!open.some((o, i) => o && i > openIndex)}
                   className="cursor-pointer rounded-full border bg-transparent px-4 py-2 disabled:cursor-default disabled:opacity-30"
                   style={{ borderColor: skin.goldSoft, color: skin.inkSoft, fontFamily: MONO_FONT, fontSize: 9.5, letterSpacing: ".16em", textTransform: "uppercase" }}
                 >

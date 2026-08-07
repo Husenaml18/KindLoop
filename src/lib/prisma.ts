@@ -22,8 +22,26 @@ import { PrismaClient } from "../../generated/prisma/client";
  */
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
+/**
+ * Say what the SSL mode actually means, before the meaning changes underneath us.
+ *
+ * `pg` currently treats `sslmode=require` as full verification — certificate and
+ * hostname both checked — and warns loudly that in pg 9 it will adopt libpq
+ * semantics instead, where `require` encrypts but verifies *nothing*. That is a
+ * silent downgrade from "safe" to "encrypted against a passive observer only",
+ * arriving with a routine dependency bump.
+ *
+ * Rewriting it to `verify-full` changes nothing today and pins the behaviour we
+ * already have. It also stops the warning, which is worth something on its own:
+ * a warning nobody can act on is one everybody learns to scroll past.
+ */
+function pinSslMode(url: string): string {
+  if (!/[?&]sslmode=(require|prefer|verify-ca)\b/.test(url)) return url;
+  return url.replace(/([?&]sslmode=)(require|prefer|verify-ca)\b/, "$1verify-full");
+}
+
 function build(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL && pinSslMode(process.env.DATABASE_URL);
   if (!connectionString) {
     /* Said plainly and early. Without this the first query fails somewhere deep
        inside the adapter with a message about an undefined host. */

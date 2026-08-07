@@ -7,6 +7,7 @@ import { fraunces, ibmPlexMono, spaceGrotesk } from "@/app/fonts";
 import theme from "@/app/theme.module.css";
 import { uploadFile } from "@/lib/clientUpload";
 import { savePersonalization } from "./actions";
+import { Breadcrumbs } from "@/app/Breadcrumbs";
 
 export function CreateEditorClient({
   templateId,
@@ -112,6 +113,18 @@ export function CreateEditorClient({
         <div className="flex flex-col gap-6">
           <div className="flex items-start justify-between gap-4">
             <div>
+            {/* The way back out. This screen drops the site header on purpose —
+                a marketing nav over unsaved work is an invitation to lose it —
+                so the trail is the only route back, and it has to be here. */}
+            <div className="mb-3">
+              <Breadcrumbs
+                items={[
+                  { label: "Kindloop", href: "/" },
+                  { label: "Experiences", href: "/templates" },
+                  { label: def.displayName },
+                ]}
+              />
+            </div>
             <h1
               className="m-0"
               style={{

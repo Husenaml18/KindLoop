@@ -108,6 +108,14 @@ export const itemSchema = z.object({
 
   /** Colour override — otherwise the theme decides. */
   color: z.string().max(40).default(""),
+  /**
+   * How solid the piece is.
+   *
+   * Floors at 0.15 rather than 0: a piece faded to nothing is invisible on the
+   * page *and* in the editor, which reads as "it disappeared" rather than "it is
+   * transparent". Anyone who wants it gone has Delete.
+   */
+  opacity: z.number().min(0.15).max(1).default(1),
   doodle: z.enum(DOODLE_SHAPES).default("heart"),
 
   /** Pocket / letter / tag contents, revealed on interaction. */
