@@ -130,16 +130,42 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) token.sub = user.id;
+
       /* A rename has to reach the session at once, or the header keeps showing
          the old name until the token expires. */
       if (trigger === "update" && typeof session?.name === "string") {
         token.name = session.name;
       }
+
+      /*
+       * Fill in the name from the account itself when the token has none.
+       *
+       * Signing in by email mints this token in the same request that creates
+       * the row, and the name arrives a moment later — the sign-up form's answers
+       * are applied by the `createUser` event below. So the first token of a new
+       * account had no name on it at all, and everything reading the session fell
+       * back to initials derived from the email address, while anything reading
+       * the database showed initials from the real name. Two different badges for
+       * the same person, on the same screen.
+       *
+       * Read once, when it is missing, and then carried on the token.
+       */
+      if (!token.name && token.sub) {
+        const account = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { name: true, email: true, image: true },
+        });
+        if (account?.name) token.name = account.name;
+        if (account?.email) token.email = account.email;
+        if (account?.image) token.picture = account.image;
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.sub) session.user.id = token.sub;
       if (session.user && typeof token.name === "string") session.user.name = token.name;
+      if (session.user && typeof token.picture === "string") session.user.image = token.picture;
       return session;
     },
   },

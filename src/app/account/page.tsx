@@ -4,7 +4,6 @@ import { fraunces, ibmPlexMono, spaceGrotesk, gochiHand } from "@/app/fonts";
 import theme from "@/app/theme.module.css";
 import { SiteHeader } from "@/app/SiteHeader";
 import { SiteFooter } from "@/app/SiteFooter";
-import { AccountMenu } from "@/app/AccountMenu";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { initialsFor } from "@/lib/initials";
@@ -81,7 +80,15 @@ export default async function AccountPage(props: PageProps<"/account">) {
         minHeight: "100dvh",
       }}
     >
-      <SiteHeader account={<AccountMenu />} signedIn />
+      {/*
+        No badge in the bar on this page.
+
+        The profile already shows the seal, larger and with the name beside it —
+        two avatars for the same person on one screen is confusing anywhere, and
+        on a phone they end up almost adjacent. The menu behind the badge is not
+        lost: everything in it is either on this page already or in the footer.
+      */}
+      <SiteHeader signedIn />
 
       {/* ---------- the cover ---------- */}
       <div
