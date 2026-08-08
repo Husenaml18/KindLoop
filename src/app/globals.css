@@ -87,15 +87,7 @@ html {
   background: transparent;
 }
 
-@keyframes penWriting {
-  0%, 100% {
-    transform: rotate(35deg) translateX(0);
-  }
-  50% {
-    transform: rotate(29deg) translateX(-2px);
-  }
-}
-
+/* The bead of ink the nib leaves on every press. */
 @keyframes inkDropFade {
   0% {
     transform: scale(.4);

@@ -2,9 +2,40 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const TRAIL_LENGTH = 9;
+/**
+ * The pointer, as a fountain pen.
+ *
+ * An earlier version read as a kite on a string, and the reasons were structural
+ * rather than a matter of taste:
+ *
+ *   - the nib was a five-point diamond — a point on top, wide shoulders, tapering
+ *     tail. That is a kite silhouette, not a nib;
+ *   - it floated 16px *above* the pointer while the ink trail was drawn *at* the
+ *     pointer, so the body hovered over its own line exactly like a kite over its
+ *     string;
+ *   - a fixed 35° tilt and a slow 0.16 follow made it drift behind the cursor as
+ *     though caught in wind.
+ *
+ * All three are answered by one idea: **the nib tip is the pointer**. The pen is
+ * drawn from that tip going up and to the right, the way a right hand holds one,
+ * and the trail starts at the same point — so the ink comes out of the nib rather
+ * than trailing beneath a floating object.
+ *
+ * Drawn as SVG rather than clip-paths so the nib can have the things that make a
+ * nib recognisable at 40px: the slit, the breather hole, the shoulders, and a
+ * brass band on the barrel.
+ *
+ * These pages set `cursor: none`, so this *is* the pointer. `FOLLOW` is therefore
+ * a usability number, not a stylistic one — too low and the tip sits behind where
+ * somebody is actually clicking.
+ */
+
+const TRAIL_LENGTH = 7;
 const INK = "#232a3d";
 const INK_LIGHT = "#3a4566";
+
+/** How far the tip moves toward the pointer each frame. Higher is tighter. */
+const FOLLOW = 0.34;
 
 interface Point {
   x: number;
@@ -13,7 +44,7 @@ interface Point {
 
 export function FountainPenCursor() {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const nibRef = useRef<HTMLDivElement>(null);
+  const penRef = useRef<SVGGElement>(null);
   const lineRefs = useRef<(SVGLineElement | null)[]>([]);
   const [isWriting, setIsWriting] = useState(false);
   const [drops, setDrops] = useState<{ id: number; x: number; y: number }[]>([]);
@@ -23,8 +54,8 @@ export function FountainPenCursor() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const wrap = wrapRef.current;
-    const nib = nibRef.current;
-    if (!wrap || !nib) return;
+    const pen = penRef.current;
+    if (!wrap || !pen) return;
 
     let px = window.innerWidth / 2;
     let py = window.innerHeight / 2;
@@ -49,8 +80,8 @@ export function FountainPenCursor() {
     };
     document.addEventListener("mouseleave", onWindowLeave);
 
-    // "Hover text: pen begins writing" — detected by tag, not a data
-    // attribute, so it works on any prose element without manual tagging.
+    /* "Hover text: the pen begins writing" — detected by tag rather than a data
+       attribute, so it works on any prose without manual tagging. */
     const onOver = (e: PointerEvent) => {
       const target = e.target as HTMLElement | null;
       setIsWriting(Boolean(target?.closest("h1, h2, h3, p, blockquote")));
@@ -69,16 +100,18 @@ export function FountainPenCursor() {
     const tick = () => {
       const dx = px - x;
       const dy = py - y;
-      x += dx * 0.16;
-      y += dy * 0.16;
+      x += dx * FOLLOW;
+      y += dy * FOLLOW;
 
       points.unshift({ x, y });
       points.length = TRAIL_LENGTH + 1;
 
-      const angle = Math.max(-14, Math.min(14, dx * 2.2));
+      /* A small lean into the direction of travel — a pen flexes, it doesn't
+         weathervane. About the resting angle of a held pen, give or take. */
+      const lean = Math.max(-7, Math.min(7, dx * 1.1));
 
       wrap.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      nib.style.transform = `rotate(${35 + angle}deg)`;
+      pen.setAttribute("transform", `rotate(${34 + lean})`);
 
       lineRefs.current.forEach((line, i) => {
         if (!line) return;
@@ -93,8 +126,9 @@ export function FountainPenCursor() {
         line.setAttribute("x2", String(b.x));
         line.setAttribute("y2", String(b.y));
         const fade = 1 - i / TRAIL_LENGTH;
-        line.setAttribute("opacity", String(fade * 0.55));
-        line.setAttribute("stroke-width", String(2.6 * fade + 0.4));
+        /* Thin and short: ink laid by a nib, not a comet tail. */
+        line.setAttribute("opacity", String(fade * 0.4));
+        line.setAttribute("stroke-width", String(1.7 * fade + 0.3));
       });
 
       raf = requestAnimationFrame(tick);
@@ -150,46 +184,71 @@ export function FountainPenCursor() {
           willChange: "transform",
         }}
       >
-        <div
-          ref={nibRef}
-          style={{
-            position: "relative",
-            marginLeft: -3,
-            marginTop: -16,
-            width: 16,
-            height: 24,
-            transformOrigin: "50% 15%",
-            clipPath: "polygon(50% 0%, 100% 38%, 58% 100%, 42% 100%, 0% 38%)",
-            background: "linear-gradient(135deg, #e3c27e, #9a752f 60%, #6e5320)",
-            boxShadow: "0 4px 8px rgba(30,25,15,.4)",
-            animation: isWriting ? "penWriting .38s ease-in-out infinite" : "none",
-          }}
+        {/*
+          The viewBox is placed so user-space (0,0) — the nib tip — lands exactly
+          on the pointer. Everything else is drawn up and to the right of it.
+        */}
+        <svg
+          width={54}
+          height={54}
+          viewBox="-8 -46 54 54"
+          style={{ display: "block", marginLeft: -8, marginTop: -46, overflow: "visible" }}
         >
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "40%",
-              width: 1,
-              height: "55%",
-              background: "rgba(30,20,10,.55)",
-              transform: "translateX(-50%)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              bottom: -2,
-              width: 3,
-              height: 3,
-              borderRadius: "50%",
-              background: INK,
-              transform: "translateX(-50%)",
-              boxShadow: isWriting ? `0 0 4px 1px ${INK_LIGHT}` : "none",
-            }}
-          />
-        </div>
+          <defs>
+            <linearGradient id="kl-nib" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0%" stopColor="#f0dcab" />
+              <stop offset="45%" stopColor="#c9a24f" />
+              <stop offset="100%" stopColor="#8f6d28" />
+            </linearGradient>
+            <linearGradient id="kl-barrel" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#4a5069" />
+              <stop offset="34%" stopColor="#232a3d" />
+              <stop offset="100%" stopColor="#141926" />
+            </linearGradient>
+          </defs>
+
+          {/* Drawn upright from the tip, then leaned over as a whole — so the tip
+              stays put no matter how far it leans. */}
+          <g ref={penRef} transform="rotate(34)" style={{ transformOrigin: "0px 0px" }}>
+            {/* barrel */}
+            <rect x={-3.4} y={-41} width={6.8} height={22} rx={3.4} fill="url(#kl-barrel)" />
+            <rect x={-2.6} y={-40} width={1.5} height={20} rx={0.75} fill="#fff" opacity={0.14} />
+            {/* the clip */}
+            <path
+              d="M2.4 -40.2 q2.5 .4 2.5 3 l0 4.4 q0 1-1 1 t-1-1 l0-3.6"
+              fill="none"
+              stroke="#c9a24f"
+              strokeWidth={1.1}
+              strokeLinecap="round"
+            />
+            {/* brass band where barrel meets grip */}
+            <rect x={-3.5} y={-19.6} width={7} height={2.1} rx={0.7} fill="#d9b768" />
+            {/* grip section, tapering to the nib */}
+            <path d="M-3.4 -17.6 L3.4 -17.6 L2.9 -12.2 L-2.9 -12.2 Z" fill="#1b202e" />
+
+            {/* the nib — the shape that has to be unmistakable */}
+            <path
+              d="M-2.9 -12.4 L2.9 -12.4 L2.5 -8.4 Q1.9 -3.6 0 0 Q-1.9 -3.6 -2.5 -8.4 Z"
+              fill="url(#kl-nib)"
+            />
+            {/* breather hole, slit and shoulders */}
+            <circle cx={0} cy={-8.2} r={0.95} fill="#1b202e" opacity={0.85} />
+            <path d="M0 -7.4 L0 -0.6" stroke="#1b202e" strokeWidth={0.55} strokeLinecap="round" opacity={0.8} />
+            <path d="M-2.5 -8.4 Q0 -9.6 2.5 -8.4" fill="none" stroke="#8f6d28" strokeWidth={0.4} opacity={0.7} />
+
+            {/* a bead of ink at the very tip, fuller while writing */}
+            <circle
+              cx={0}
+              cy={0}
+              r={isWriting ? 1.7 : 1.05}
+              fill={INK}
+              style={{
+                transition: "r .18s ease",
+                filter: isWriting ? `drop-shadow(0 0 3px ${INK_LIGHT})` : "none",
+              }}
+            />
+          </g>
+        </svg>
       </div>
 
       {drops.map((d) => (
