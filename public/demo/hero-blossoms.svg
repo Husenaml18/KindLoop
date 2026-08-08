@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-label="Pressed blossoms and petals scattered across warm paper">
+  <!--
+    The backdrop behind the sample website's opening.
+
+    Drawn rather than photographed. Every stock frame that fits "warm landscape"
+    reads as a travel site, and Kindloop's whole look is pressed flowers, paper
+    and polaroid corners — a coastal road behind "Four years, more or less in
+    order" belonged to a different product.
+
+    It sits at a third opacity under the title, so it is built to lose: broad
+    soft washes, no hard edges near the middle, and the densest work pushed into
+    the corners where the headline never goes. Anything with real contrast in the
+    centre would fight the words.
+  -->
+
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="18%" r="72%">
+      <stop offset="0%" stop-color="#ffeede" stop-opacity=".95"/>
+      <stop offset="55%" stop-color="#f6d3c6" stop-opacity=".5"/>
+      <stop offset="100%" stop-color="#e8bdb6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bokeh" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffe2c8" stop-opacity=".55"/>
+      <stop offset="70%" stop-color="#f0b9a4" stop-opacity=".22"/>
+      <stop offset="100%" stop-color="#e6a894" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b7c3a4"/>
+      <stop offset="100%" stop-color="#8fa07d"/>
+    </linearGradient>
+
+    <!-- one blossom, reused at different sizes and angles -->
+    <g id="bloom">
+      <g fill="#d9836f">
+        <ellipse cx="0" cy="-17" rx="9.5" ry="16"/>
+        <ellipse cx="16" cy="-5" rx="9.5" ry="16" transform="rotate(72 16 -5)"/>
+        <ellipse cx="10" cy="14" rx="9.5" ry="16" transform="rotate(144 10 14)"/>
+        <ellipse cx="-10" cy="14" rx="9.5" ry="16" transform="rotate(216 -10 14)"/>
+        <ellipse cx="-16" cy="-5" rx="9.5" ry="16" transform="rotate(288 -16 -5)"/>
+      </g>
+      <circle r="6" fill="#e0b070"/>
+    </g>
+
+    <!-- a single fallen petal -->
+    <path id="petal" d="M0 0 C 13 -9, 27 -4, 27 9 C 27 22, 12 27, 0 20 C -7 15, -6 6, 0 0 Z" fill="#d18d78"/>
+
+    <!-- a sprig of leaves -->
+    <g id="sprig" stroke="#8b9d78" stroke-width="2.4" fill="none">
+      <path d="M0 0 C 22 -14, 52 -20, 82 -18"/>
+      <path d="M18 -9 C 22 -22, 33 -27, 40 -25 C 38 -14, 28 -8, 18 -9 Z" fill="url(#leaf)" stroke="none"/>
+      <path d="M40 -16 C 45 -29, 56 -33, 63 -31 C 61 -20, 51 -14, 40 -16 Z" fill="url(#leaf)" stroke="none"/>
+      <path d="M27 -3 C 32 8, 28 18, 21 21 C 17 12, 19 3, 27 -3 Z" fill="url(#leaf)" stroke="none"/>
+    </g>
+
+    <!-- a small paper heart -->
+    <path id="heart" d="M0 6 C -12 -6, -20 -14, -12 -21 C -6 -26, 0 -21, 0 -15 C 0 -21, 6 -26, 12 -21 C 20 -14, 12 -6, 0 6 Z" fill="#cf7a68"/>
+  </defs>
+
+  <!-- the ground: light at the top, so the title always has air behind it -->
+  <rect width="1600" height="1000" fill="#f3d5cc"/>
+  <rect width="1600" height="1000" fill="url(#glow)"/>
+
+  <!-- soft lights, all kept out of the middle band -->
+  <g>
+    <circle cx="180" cy="150" r="130" fill="url(#bokeh)"/>
+    <circle cx="1430" cy="210" r="165" fill="url(#bokeh)"/>
+    <circle cx="1290" cy="880" r="140" fill="url(#bokeh)"/>
+    <circle cx="300" cy="835" r="120" fill="url(#bokeh)"/>
+    <circle cx="820" cy="960" r="150" fill="url(#bokeh)"/>
+    <circle cx="60" cy="520" r="95" fill="url(#bokeh)"/>
+    <circle cx="1560" cy="560" r="105" fill="url(#bokeh)"/>
+  </g>
+
+  <!-- top corners -->
+  <g opacity="1">
+    <use href="#sprig" transform="translate(58 92) rotate(14)"/>
+    <use href="#sprig" transform="translate(1500 130) rotate(168) scale(1.15)"/>
+    <use href="#bloom" transform="translate(140 190) rotate(-12) scale(1.25)"/>
+    <use href="#bloom" transform="translate(232 118) rotate(24) scale(.85)"/>
+    <use href="#bloom" transform="translate(1452 235) rotate(16) scale(1.15)"/>
+    <use href="#bloom" transform="translate(1358 150) rotate(-20) scale(.78)"/>
+    <use href="#petal" transform="translate(330 205) rotate(38) scale(.9)"/>
+    <use href="#petal" transform="translate(1268 268) rotate(-56)"/>
+    <use href="#heart" transform="translate(408 128) rotate(-14) scale(.9)"/>
+  </g>
+
+  <!-- bottom corners, heavier: the eye lands here after the title -->
+  <g opacity="1">
+    <use href="#sprig" transform="translate(70 905) rotate(-22) scale(1.2)"/>
+    <use href="#sprig" transform="translate(1540 860) rotate(196) scale(1.3)"/>
+    <use href="#bloom" transform="translate(168 852) rotate(18) scale(1.4)"/>
+    <use href="#bloom" transform="translate(276 930) rotate(-28) scale(1)"/>
+    <use href="#bloom" transform="translate(84 968) rotate(8) scale(.8)"/>
+    <use href="#bloom" transform="translate(1412 828) rotate(-16) scale(1.35)"/>
+    <use href="#bloom" transform="translate(1318 918) rotate(30) scale(.92)"/>
+    <use href="#petal" transform="translate(452 902) rotate(-24) scale(1.1)"/>
+    <use href="#petal" transform="translate(1180 852) rotate(64) scale(.95)"/>
+    <use href="#petal" transform="translate(626 966) rotate(12)"/>
+    <use href="#heart" transform="translate(1092 930) rotate(18) scale(1.05)"/>
+    <use href="#heart" transform="translate(540 826) rotate(-8) scale(.75)"/>
+  </g>
+
+  <!-- a few drifting through the quiet middle, small and pale -->
+  <g opacity=".42">
+    <use href="#petal" transform="translate(212 470) rotate(-18) scale(.7)"/>
+    <use href="#petal" transform="translate(1372 512) rotate(128) scale(.72)"/>
+    <use href="#petal" transform="translate(96 660) rotate(46) scale(.6)"/>
+    <use href="#petal" transform="translate(1502 690) rotate(-92) scale(.66)"/>
+    <use href="#heart" transform="translate(1268 430) rotate(-22) scale(.6)"/>
+    <use href="#heart" transform="translate(298 596) rotate(16) scale(.55)"/>
+  </g>
+</svg>

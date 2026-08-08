@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTemplate } from "@/lib/templates/registry";
 import { TEMPLATE_DEMOS } from "@/lib/templates/demos";
 import { DemoFrame } from "./DemoFrame";
+import { TemplateFonts } from "@/app/TemplateFonts";
 
 export async function generateMetadata(props: PageProps<"/demo/[template]">): Promise<Metadata> {
   const { template } = await props.params;
@@ -27,11 +28,13 @@ export default async function DemoPage(props: PageProps<"/demo/[template]">) {
   if (!parsed.success) notFound();
 
   return (
-    <DemoFrame
-      View={def.View as never}
-      content={parsed.data}
-      templateName={def.displayName}
-      createHref={`/create/${def.id}`}
-    />
+    <TemplateFonts>
+      <DemoFrame
+        View={def.View as never}
+        content={parsed.data}
+        templateName={def.displayName}
+        createHref={`/create/${def.id}`}
+      />
+    </TemplateFonts>
   );
 }

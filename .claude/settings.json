@@ -42,7 +42,23 @@
       "Bash(awk 'NR>=890 && NR<=900' src/lib/templates/digital-scrapbook/Editor.tsx)",
       "Bash(ip -4 addr show scope global)",
       "Bash(awk '/inet /{print \"  \" $2, \"on\", $NF}')",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(awk '/TRUST_BADGES.map/,/\\\\\\)\\\\\\)\\\\}/' src/app/templates/TemplatesGallery.tsx)",
+      "Bash(sed -n '/^model Order/,/^}/p' prisma/schema.prisma)",
+      "Bash(node -e \"console.log\\('@vercel/blob', require\\('./package.json'\\).dependencies['@vercel/blob']\\)\")",
+      "Bash(grep -o '\"\\\\$ACTION_ID_[a-f0-9]*\"' /tmp/claude-1001/-home-husena-Projects-kindloop/1cf3da70-1f12-404b-91fa-bb93cef7fbe4/scratchpad/mock.html)",
+      "Bash(curl -s http://localhost:3000/website/ZnZLuztpBxX7 -o /tmp/claude-1001/-home-husena-Projects-kindloop/1cf3da70-1f12-404b-91fa-bb93cef7fbe4/scratchpad/site2.html -w '%{http_code}\\\\n')",
+      "Bash(sed -i '/unlocked: true/s/unlocked: true/unlocked: true/' scripts/tmp-seed-site.ts)",
+      "Bash(curl -s http://localhost:3000/website/ZnZLuztpBxX7 -o /tmp/claude-1001/-home-husena-Projects-kindloop/1cf3da70-1f12-404b-91fa-bb93cef7fbe4/scratchpad/site3.html -w '%{http_code}\\\\n')",
+      "Bash(curl -s -o /dev/null -w \"demo/memoryverse: %{http_code}\\\\n\" -L http://localhost:3000/demo/memoryverse)",
+      "Bash(echo \"=== build exit: $? ===\")",
+      "Bash(npm init *)",
+      "Bash(sed -i 's#'\\\\''/home/husena/Projects/kindloop/node_modules/playwright-core'\\\\''#'\\\\''/tmp/claude-1001/-home-husena-Projects-kindloop/1cf3da70-1f12-404b-91fa-bb93cef7fbe4/scratchpad/node_modules/playwright-core'\\\\''#' /tmp/claude-1001/-home-husena-Projects-kindloop/1cf3da70-1f12-404b-91fa-bb93cef7fbe4/scratchpad/measure.js)",
+      "Bash(node /tmp/claude-1001/-home-husena-Projects-kindloop/1cf3da70-1f12-404b-91fa-bb93cef7fbe4/scratchpad/measure.js)",
+      "Bash(grep -oE '#[0-9a-zA-Z]{2,9}\\\\b' src/lib/templates/mini-world/theme.ts)",
+      "Bash(grep -vE '^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{8}$')",
+      "Bash(curl -s -o /dev/null -w \"/templates: %{http_code}\\\\n\" http://localhost:3000/templates)",
+      "Bash(curl -s -o /dev/null -w \"/demo: %{http_code}\\\\n\" http://localhost:3000/demo)"
     ]
   }
 }

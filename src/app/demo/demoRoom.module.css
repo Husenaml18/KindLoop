@@ -1,0 +1,459 @@
+/*
+ * The demo room.
+ *
+ * Kraft and ink, like every other page here. An earlier pass made this dark to
+ * match a reference, and it read as a different product bolted onto the side —
+ * the composition was the useful part of that reference, not the palette.
+ *
+ * So the invention is in the objects rather than the colours: a doorway standing
+ * open on the sheet with warm light coming through it, photographs pinned round
+ * the frame, a note taped to the wall, and the walkthroughs laid down the page in
+ * a zig-zag you follow rather than a grid you scan.
+ */
+
+.room {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+  color: var(--ink-muted);
+  background:
+    radial-gradient(circle at 18% 26%, rgba(122, 92, 52, 0.07) 0.7px, transparent 1px),
+    radial-gradient(circle at 72% 64%, rgba(122, 92, 52, 0.055) 0.6px, transparent 0.9px),
+    radial-gradient(ellipse 66% 44% at 66% 8%, rgba(232, 178, 106, 0.3), transparent 66%),
+    linear-gradient(180deg, var(--bg2) 0%, var(--bg0) 38%, var(--bg1) 100%);
+  background-size: 39px 43px, 57px 51px, auto, auto;
+}
+
+/* Dust in the light coming through the door. */
+.embers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ember {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(180, 130, 60, 0.5);
+}
+
+/* ---------- the hero ---------- */
+
+.hero {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 40px;
+  padding: 34px 0 64px;
+}
+
+.eyebrow {
+  font-family: var(--font-gochi), cursive;
+  font-size: 21px;
+  color: var(--rust);
+}
+.heroTitle {
+  margin: 12px 0 0;
+  font-family: var(--font-fraunces), serif;
+  font-weight: 500;
+  font-size: clamp(34px, 4.6vw, 54px);
+  line-height: 1.05;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.heroTitle em {
+  font-style: normal;
+  color: var(--rust);
+}
+.heroBody {
+  margin: 20px 0 0;
+  max-width: 390px;
+  font-size: 16px;
+  line-height: 1.72;
+  color: var(--ink-muted);
+}
+.heroHand {
+  margin: 24px 0 0;
+  font-family: var(--font-gochi), cursive;
+  font-size: 19px;
+  color: var(--rust);
+}
+
+/* ---------- the doorway ---------- */
+
+.doorWrap {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  display: grid;
+  place-items: center;
+}
+
+/* The light on the wall around the opening. */
+.doorGlow {
+  position: absolute;
+  inset: 2% 8%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 46%, rgba(232, 178, 106, 0.55), transparent 64%);
+  filter: blur(30px);
+}
+
+/* The frame: a painted arch standing on the paper. */
+.door {
+  position: relative;
+  width: min(70%, 320px);
+  aspect-ratio: 3 / 4;
+  border-radius: 50% 50% 5px 5px / 34% 34% 5px 5px;
+  background: linear-gradient(180deg, var(--tan-deep), var(--tan));
+  box-shadow: 0 34px 66px -34px rgba(74, 44, 14, 0.55), inset 0 0 0 1px rgba(122, 92, 52, 0.24);
+  overflow: hidden;
+}
+/*
+ * The room beyond it, which is the one warm dark thing on the page.
+ *
+ * Everything the product does happens on paper; the doorway is the exception
+ * because a lit room only reads as lit if what surrounds it is not.
+ */
+.doorInner {
+  position: absolute;
+  inset: 5% 7% 0;
+  border-radius: 50% 50% 3px 3px / 32% 32% 3px 3px;
+  background:
+    radial-gradient(ellipse 74% 48% at 50% 32%, rgba(255, 208, 148, 0.95), transparent 72%),
+    linear-gradient(180deg, #d9a25a, #a8663c 58%, #6b3d1d);
+  overflow: hidden;
+}
+.doorSign {
+  position: absolute;
+  left: 50%;
+  top: 27%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-family: var(--font-gochi), cursive;
+  font-size: clamp(13px, 1.5vw, 18px);
+  line-height: 1.25;
+  color: #4a2a12;
+  white-space: nowrap;
+}
+
+.doorLights {
+  position: absolute;
+  inset: 5% 7% auto;
+  height: 24%;
+  pointer-events: none;
+}
+.doorBulb {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff3d6;
+  box-shadow: 0 0 8px 3px rgba(255, 214, 150, 0.9);
+}
+
+/* photographs pinned round the frame */
+.pinned {
+  position: absolute;
+  width: 17%;
+  aspect-ratio: 4 / 5;
+  border-radius: 3px;
+  padding: 5px 5px 12px;
+  background: var(--paper);
+  box-shadow: 0 16px 30px -16px rgba(74, 44, 14, 0.6);
+  overflow: hidden;
+}
+.pinnedShot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+/* the note taped to the wall */
+.note {
+  position: absolute;
+  right: -2%;
+  top: 10%;
+  width: 30%;
+  min-width: 158px;
+  padding: 20px 18px 22px;
+  background: linear-gradient(170deg, #fff4cf, #f7e3a8);
+  box-shadow: 0 20px 40px -22px rgba(74, 44, 14, 0.6);
+  transform: rotate(4deg);
+  font-family: var(--font-gochi), cursive;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: #5c4025;
+}
+.noteTape {
+  position: absolute;
+  left: 50%;
+  top: -11px;
+  width: 62px;
+  height: 22px;
+  transform: translateX(-50%) rotate(-3deg);
+  background: rgba(201, 146, 47, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+/* ---------- the path ---------- */
+
+.pathHead {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-top: 20px;
+}
+.pathTitle {
+  margin: 0;
+  font-family: var(--font-gochi), cursive;
+  font-size: clamp(26px, 3.4vw, 38px);
+  color: var(--ink);
+}
+.pathRule {
+  display: block;
+  width: 190px;
+  height: 2px;
+  margin: 14px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(to right, transparent, var(--rust), transparent);
+}
+
+.path {
+  position: relative;
+  z-index: 2;
+  margin-top: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Each stop alternates side, so the eye zig-zags down the page rather than
+   scanning a grid — the useful half of the reference. */
+.stop {
+  display: grid;
+  grid-template-columns: minmax(0, 258px) minmax(0, 1fr);
+  align-items: center;
+  gap: 26px;
+  max-width: 720px;
+  padding: 14px;
+  border-radius: 16px;
+  text-decoration: none;
+  transition: background-color 0.35s ease, box-shadow 0.35s ease;
+}
+.stop:hover {
+  background: var(--paper);
+  box-shadow: 0 22px 46px -32px rgba(74, 44, 14, 0.55);
+}
+.stopRight {
+  margin-left: auto;
+}
+.stopLeft {
+  margin-right: auto;
+}
+
+.stopArt {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--tan);
+  box-shadow: 0 20px 40px -24px rgba(74, 44, 14, 0.6);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.stop:hover .stopArt {
+  transform: translateY(-5px) scale(1.02);
+}
+
+.stopNo {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--rust);
+}
+.stopName {
+  margin: 8px 0 0;
+  font-family: var(--font-fraunces), serif;
+  font-weight: 500;
+  font-size: clamp(20px, 2.2vw, 26px);
+  line-height: 1.14;
+  color: var(--ink);
+}
+.stopBlurb {
+  margin: 10px 0 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+.stopGo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+
+/* ---------- coming soon ---------- */
+
+.soon {
+  position: relative;
+  z-index: 2;
+  margin: 52px auto 0;
+  max-width: 540px;
+  padding: 22px 26px;
+  border-radius: 18px;
+  border: 1px dashed rgba(122, 92, 52, 0.4);
+  text-align: center;
+}
+.soonTitle {
+  margin: 0;
+  font-family: var(--font-gochi), cursive;
+  font-size: 20px;
+  color: var(--rust);
+}
+.soonList {
+  margin: 12px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+}
+.soonChip {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid rgba(58, 42, 24, 0.12);
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+/* ---------- the closing panel ---------- */
+
+.closer {
+  position: relative;
+  z-index: 2;
+  margin: 66px 0 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: 34px;
+  padding: 34px;
+  border-radius: 20px;
+  background: var(--paper);
+  border: 1px solid rgba(58, 42, 24, 0.14);
+  box-shadow: 0 26px 54px -36px rgba(74, 44, 14, 0.5);
+}
+.closerTitle {
+  margin: 0;
+  font-family: var(--font-fraunces), serif;
+  font-weight: 500;
+  font-size: clamp(23px, 2.6vw, 30px);
+  color: var(--ink);
+}
+.closerBody {
+  margin: 10px 0 22px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+.closerPoints {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  text-align: center;
+}
+.pointTitle {
+  margin: 10px 0 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.pointBody {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+/* ---------- buttons ---------- */
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 48px;
+  padding: 0 26px;
+  border: none;
+  border-radius: 999px;
+  background: var(--brass);
+  color: var(--on-dark);
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 14px 30px -16px rgba(46, 30, 14, 0.9);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 38px -16px rgba(46, 30, 14, 0.95);
+}
+
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(122, 92, 52, 0.3);
+  background: rgba(253, 250, 241, 0.6);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.22s ease, color 0.22s ease;
+}
+.ghost:hover {
+  border-color: var(--rust);
+  color: var(--rust);
+}
+
+/* ---------- narrower ---------- */
+
+@media (max-width: 900px) {
+  .hero,
+  .closer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero {
+    gap: 28px;
+    padding-bottom: 36px;
+  }
+  .stop {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    max-width: none;
+    margin: 0;
+  }
+  .note {
+    position: static;
+    width: auto;
+    transform: rotate(-1deg);
+    margin-top: 20px;
+  }
+  .closerPoints {
+    gap: 10px;
+  }
+}

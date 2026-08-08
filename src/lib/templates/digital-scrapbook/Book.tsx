@@ -368,95 +368,12 @@ export function Book({
             </>
           )}
 
-          {/*
-            The corner you lift to turn the page.
-
-            This was a flat triangle that rotated sixteen degrees — a shape
-            spinning in the plane of the page, which reads as a graphic moving
-            rather than paper lifting. Real paper hinges along the diagonal and
-            comes *off* the sheet toward you, so this does that: a perspective on
-            the container, and the flap rotated about the (1,-1,0) axis through
-            the corner itself.
-
-            Three things sell it beyond the rotation. The underside is its own
-            face in a warmer, darker stock, revealed as the corner comes over.
-            The shadow it casts onto the page grows and softens as it lifts,
-            which is what gives the corner height. And the whole peel gets
-            larger, because a corner curling toward you covers more of the page.
-          */}
+          {/* The corner you lift to go on, and the one you lift to go back. */}
           {!reduced && !showSingle && index < total - 1 && (
-            <motion.button
-              type="button"
-              onClick={() => turn(1)}
-              aria-label="Turn the page"
-              className="absolute bottom-0 right-0 z-[47] cursor-pointer border-0 bg-transparent p-0"
-              style={{ width: "14%", aspectRatio: "1", perspective: 620 }}
-              initial="rest"
-              whileHover="lift"
-              whileFocus="lift"
-              animate="rest"
-              variants={{ rest: {}, lift: {} }}
-            >
-              {/* the shadow the lifted corner drops onto the page below it */}
-              <motion.span
-                aria-hidden
-                className="absolute bottom-0 right-0"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
-                  background: "rgba(58,40,22,.34)",
-                  filter: "blur(7px)",
-                  transformOrigin: "100% 100%",
-                }}
-                variants={{
-                  rest: { opacity: 0, scale: 0.6, x: 0, y: 0 },
-                  lift: { opacity: 0.5, scale: 0.86, x: -7, y: -7 },
-                }}
-                transition={{ type: "spring", stiffness: 180, damping: 22 }}
-              />
-
-              {/* the flap itself, hinged on the corner's diagonal */}
-              <motion.span
-                aria-hidden
-                className="absolute bottom-0 right-0 h-full w-full"
-                style={{
-                  transformOrigin: "100% 100%",
-                  transformStyle: "preserve-3d",
-                }}
-                /* A diagonal hinge, expressed as the two axes Framer animates.
-                   Lifting the bottom edge and the right edge together is the
-                   same motion as folding about the corner's diagonal, and it
-                   composes without a transform string that would fight the
-                   spring. */
-                variants={{
-                  rest: { rotateX: -4, rotateY: 4, scale: 0.62 },
-                  lift: { rotateX: -72, rotateY: 72, scale: 1 },
-                }}
-                transition={{ type: "spring", stiffness: 150, damping: 19, mass: 0.7 }}
-              >
-                {/* the face that is the page, seen until it folds over */}
-                <span
-                  className="absolute inset-0"
-                  style={{
-                    clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
-                    background: `linear-gradient(315deg, ${theme.paperEdge} 0%, ${theme.paper} 62%)`,
-                    backfaceVisibility: "hidden",
-                  }}
-                />
-                {/* the underside, which is what you actually see once it curls */}
-                <span
-                  className="absolute inset-0"
-                  style={{
-                    clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
-                    background: `linear-gradient(135deg, ${theme.paper} 0%, ${theme.paperEdge} 78%)`,
-                    transform: "rotateY(180deg)",
-                    backfaceVisibility: "hidden",
-                    boxShadow: "inset 2px 2px 6px rgba(58,40,22,.18)",
-                  }}
-                />
-              </motion.span>
-            </motion.button>
+            <PageCorner dir={1} theme={theme} onTurn={() => turn(1)} />
+          )}
+          {!reduced && !showSingle && index > 0 && (
+            <PageCorner dir={-1} theme={theme} onTurn={() => turn(-1)} />
           )}
         </div>
 
@@ -520,5 +437,112 @@ export function Book({
         </button>
       </div>
     </div>
+  );
+}
+
+/**
+ * A corner of the page, lifted.
+ *
+ * One component for both directions rather than two mirrored copies — the
+ * forward corner was rebuilt once already, and a hand-mirrored twin is the kind
+ * of thing that gets a fix applied to one side and not the other.
+ *
+ * Everything that differs between them is a sign: which side it sits on, which
+ * way the fold's diagonal runs, and which way the shadow falls. `dir` is 1 for
+ * "next", hinged at the bottom-right, and -1 for "back", hinged at bottom-left.
+ *
+ * The curl itself is real 3D. Paper hinges along the corner's diagonal and comes
+ * *off* the sheet toward you, so the flap rotates about both axes at once inside
+ * a perspective; three things then sell it. The underside is its own face in
+ * darker stock, revealed as the corner comes over. The shadow it drops on the
+ * page grows and softens as it rises. And the whole peel gets larger, because a
+ * corner curling toward you covers more of the page.
+ */
+function PageCorner({
+  dir,
+  theme,
+  onTurn,
+}: {
+  dir: 1 | -1;
+  theme: PageTheme;
+  onTurn: () => void;
+}) {
+  const next = dir === 1;
+  /* The triangle points at the outer corner, whichever side that is. */
+  const clip = next ? "polygon(100% 0, 100% 100%, 0 100%)" : "polygon(0 0, 100% 100%, 0 100%)";
+
+  return (
+    <motion.button
+      type="button"
+      onClick={onTurn}
+      aria-label={next ? "Turn the page" : "Turn back a page"}
+      className="absolute bottom-0 z-[47] cursor-pointer border-0 bg-transparent p-0"
+      style={{
+        [next ? "right" : "left"]: 0,
+        width: "14%",
+        aspectRatio: "1",
+        perspective: 620,
+      }}
+      initial="rest"
+      whileHover="lift"
+      whileFocus="lift"
+      animate="rest"
+      variants={{ rest: {}, lift: {} }}
+    >
+      <motion.span
+        aria-hidden
+        className="absolute bottom-0"
+        style={{
+          [next ? "right" : "left"]: 0,
+          width: "100%",
+          height: "100%",
+          clipPath: clip,
+          background: "rgba(58,40,22,.34)",
+          filter: "blur(7px)",
+          transformOrigin: next ? "100% 100%" : "0% 100%",
+        }}
+        variants={{
+          rest: { opacity: 0, scale: 0.6, x: 0, y: 0 },
+          lift: { opacity: 0.5, scale: 0.86, x: next ? -7 : 7, y: -7 },
+        }}
+        transition={{ type: "spring", stiffness: 180, damping: 22 }}
+      />
+
+      <motion.span
+        aria-hidden
+        className="absolute bottom-0 h-full w-full"
+        style={{
+          [next ? "right" : "left"]: 0,
+          transformOrigin: next ? "100% 100%" : "0% 100%",
+          transformStyle: "preserve-3d",
+        }}
+        /* The diagonal hinge, as the two axes Framer animates. Mirroring the
+           corner mirrors the Y rotation with it. */
+        variants={{
+          rest: { rotateX: -4, rotateY: 4 * dir, scale: 0.62 },
+          lift: { rotateX: -72, rotateY: 72 * dir, scale: 1 },
+        }}
+        transition={{ type: "spring", stiffness: 150, damping: 19, mass: 0.7 }}
+      >
+        <span
+          className="absolute inset-0"
+          style={{
+            clipPath: clip,
+            background: `linear-gradient(${next ? 315 : 45}deg, ${theme.paperEdge} 0%, ${theme.paper} 62%)`,
+            backfaceVisibility: "hidden",
+          }}
+        />
+        <span
+          className="absolute inset-0"
+          style={{
+            clipPath: clip,
+            background: `linear-gradient(${next ? 135 : 225}deg, ${theme.paper} 0%, ${theme.paperEdge} 78%)`,
+            transform: "rotateY(180deg)",
+            backfaceVisibility: "hidden",
+            boxShadow: "inset 2px 2px 6px rgba(58,40,22,.18)",
+          }}
+        />
+      </motion.span>
+    </motion.button>
   );
 }

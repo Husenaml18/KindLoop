@@ -104,6 +104,24 @@
 .galleryCard:hover { transform: translateY(-4px); box-shadow: 0 22px 40px -26px rgba(0, 0, 0, .5); }
 .galleryCard:hover .galleryOverlay { opacity: 1; }
 
+/*
+ * The one card that takes two columns.
+ *
+ * Every other experience's artwork is square, which crops cleanly into the 5:4
+ * frame the cards share. Personalized Website's is a 3:2 banner of a whole
+ * composed site — in a 270px column it lost its own title off the left edge and
+ * the detail turned to mush. Two columns give it its native ratio at a size where
+ * the thing it is advertising is actually legible.
+ *
+ * Guarded by the breakpoint because the grid is `auto-fill minmax(270px, 1fr)`:
+ * below roughly 610px of content there is only one column, and an item spanning
+ * two would force an implicit column and push the grid off screen. Under that, it
+ * is an ordinary card.
+ */
+@media (min-width: 700px) {
+  .wideCard { grid-column: span 2; }
+}
+
 .occasionCard { border-color: rgba(43, 38, 32, .08); transform: translateY(0); }
 .occasionCard:hover { border-color: var(--rust); transform: translateY(-4px); }
 

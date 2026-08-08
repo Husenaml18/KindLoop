@@ -1,12 +1,17 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getTemplate } from "@/lib/templates/registry";
+import { TemplateFonts } from "@/app/TemplateFonts";
 
 export default async function GiftViewPage(props: PageProps<"/g/[slug]">) {
   const { slug } = await props.params;
 
   const gift = await prisma.gift.findUnique({ where: { slug } });
   if (!gift) notFound();
+
+  /* A Personalized Website is a site, not a gift you open, and it has its own address
+     with its own paywall. One slug, one canonical URL. */
+  if (gift.template === "personalized-website") redirect(`/website/${slug}`);
 
   const def = getTemplate(gift.template);
   if (!def) notFound();
@@ -30,5 +35,9 @@ export default async function GiftViewPage(props: PageProps<"/g/[slug]">) {
 
   // Full bleed: each template owns its own atmosphere, so nothing is wrapped
   // in shared chrome that would leak one template's look into another's.
-  return <def.View content={content} />;
+  return (
+    <TemplateFonts>
+      <def.View content={content} />
+    </TemplateFonts>
+  );
 }

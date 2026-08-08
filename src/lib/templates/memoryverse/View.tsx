@@ -621,9 +621,18 @@ export function MemoryverseView({
     setIndex((i) => Math.max(0, i - 1));
   }, []);
 
-  /* Keyboard, wheel — only while slides are on screen. */
+  /*
+   * Keyboard, wheel — only while slides are on screen, and only when this owns
+   * the viewport.
+   *
+   * These are bound to `window`, which is right when the projector *is* the page
+   * and wrong the moment it is one section of something longer: a scroll
+   * anywhere on a Personalized Website would advance slides down here, out of sight.
+   * Embedded, the on-screen arrows and the chapter tray are the way through, and
+   * the page scrolls like a page.
+   */
   useEffect(() => {
-    if (stage !== "chapters") return;
+    if (stage !== "chapters" || embedded) return;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " " || e.key === "PageDown") {
@@ -655,7 +664,7 @@ export function MemoryverseView({
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("wheel", onWheel);
     };
-  }, [stage, goNext, goPrev, total]);
+  }, [stage, embedded, goNext, goPrev, total]);
 
   const beginJourney = () => {
     if (content.musicUrl && musicRef.current) {

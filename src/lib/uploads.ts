@@ -1,8 +1,9 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { generateFilename } from "@/lib/slug";
+import { putFile, UPLOADS_ROOT } from "@/lib/storage";
 
-export const UPLOADS_ROOT = path.join(process.cwd(), "uploads");
+/* Re-exported so existing importers keep working; the path itself now belongs to
+   the storage driver, which is the only thing that should know about disks. */
+export { UPLOADS_ROOT };
 
 /**
  * What may be uploaded, and what it gets written out as.
@@ -74,12 +75,8 @@ export async function saveUploadedFile(file: File, giftId: string) {
     );
   }
 
+  /* Validation above is identical whichever driver is live — the rules about
+     what may be uploaded belong to the product, not to the storage. */
   const filename = `${generateFilename()}.${extension}`;
-  const giftDir = path.join(UPLOADS_ROOT, giftId);
-  await mkdir(giftDir, { recursive: true });
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(giftDir, filename), buffer);
-
-  return { url: `/api/media/${giftId}/${filename}` };
+  return putFile(giftId, filename, file);
 }

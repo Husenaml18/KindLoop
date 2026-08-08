@@ -21,12 +21,66 @@ import { SiteHeader } from "@/app/SiteHeader";
 import { SiteFooter } from "@/app/SiteFooter";
 import { PAGE_WIDTH } from "@/app/PageContainer";
 
-const TRUST_BADGES = [
-  { icon: "🔒", label: "Private by default" },
-  { icon: "📱", label: "No app needed" },
-  { icon: "⚡", label: "Ready in minutes" },
-  { icon: "🗑️", label: "Delete any time" },
-  { icon: "✨", label: "Free to start" },
+/*
+ * The five promises, drawn rather than typed as emoji.
+ *
+ * A row of system emoji renders differently on every platform and belongs to
+ * none of them — next to hand-set type on kraft paper, 🔒📱⚡🗑️✨ was the
+ * loudest thing on the page and the only part of it nobody drew. These are the
+ * same marks, in ink, at one weight.
+ */
+const TRUST_BADGES: { id: string; label: string; path: React.ReactNode }[] = [
+  {
+    id: "private",
+    label: "Private by default",
+    path: (
+      <>
+        <path d="M5.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" />
+        <rect x="3.6" y="8.5" width="10.8" height="7.4" rx="1.6" />
+      </>
+    ),
+  },
+  {
+    id: "noapp",
+    label: "No app needed",
+    path: (
+      <>
+        <rect x="2.4" y="4.6" width="13.2" height="8.6" rx="1.4" />
+        <path d="M6.4 15.6h5.2" />
+      </>
+    ),
+  },
+  {
+    id: "minutes",
+    label: "Ready in minutes",
+    path: (
+      <>
+        <circle cx="9" cy="9.6" r="6" />
+        <path d="M9 6.2v3.6l2.4 1.5" />
+      </>
+    ),
+  },
+  {
+    id: "delete",
+    label: "Delete any time",
+    path: (
+      <>
+        <path d="M3.8 5.6h10.4" />
+        <path d="M7.2 5.6V4.2a1 1 0 0 1 1-1h1.6a1 1 0 0 1 1 1v1.4" />
+        <path d="M5.2 5.6l.7 9a1 1 0 0 0 1 .95h4.2a1 1 0 0 0 1-.95l.7-9" />
+      </>
+    ),
+  },
+  {
+    id: "free",
+    label: "Free to start",
+    path: (
+      <>
+        <path d="M9 2.8l1.5 4.1 4.1 1.5-4.1 1.5L9 14l-1.5-4.1L3.4 8.4l4.1-1.5z" />
+        <path d="M14.2 12.6l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6z" />
+      </>
+    ),
+  },
 ];
 
 type SortMode = "featured" | "category" | "az" | "quickest";
@@ -42,6 +96,17 @@ const STATUS_RANK: Record<CatalogTemplate["status"], number> = {
   soon: 1,
   horizon: 2,
 };
+
+/**
+ * Experiences whose artwork is a 3:2 banner rather than the square everything
+ * else uses. They get a frame that matches, because cover-fitting 1.5 into 1.25
+ * crops the sides — which on both of these means losing the title off the left
+ * edge of their own picture.
+ */
+const WIDE_ART = new Set(["personalized-website", "my-red-flags"]);
+
+/** The one card that also takes two columns. See `.wideCard`. */
+const HERO_ID = "personalized-website";
 
 const CATEGORY_BY_ID = new Map(CATEGORIES.map((c) => [c.id, c]));
 const CATEGORY_ORDER = new Map(CATEGORIES.map((c, i) => [c.id, i]));
@@ -87,34 +152,36 @@ function ExperienceCard({
 }) {
   const live = template.status === "available";
   const category = CATEGORY_BY_ID.get(template.category);
+  /* 3:2 artwork gets a 3:2 frame; the hero also gets two columns. Kept as two
+     separate ideas because they are: one is about not cropping a picture, the
+     other is about which card the eye lands on first. */
+  const wide = WIDE_ART.has(template.id);
+  const hero = template.id === HERO_ID;
 
   return (
     <div
-      className={`${styles.galleryCard} ${theme.paperSheet}`}
+      className={`${styles.galleryCard} ${theme.paperSheet}${hero ? ` ${styles.wideCard}` : ""}`}
       style={cssStyle(
         "position:relative;display:flex;flex-direction:column;height:100%;border-radius:12px;overflow:hidden;border:1px solid rgba(58,42,24,.16);transition:transform .25s ease,box-shadow .25s ease"
       )}
     >
       {/* 5:4 rather than a fixed height: the artwork is square, so the old 142px
-            band cropped away more than half of every composition. */}
-      <div style={cssStyle("position:relative;aspect-ratio:5 / 4;overflow:hidden")}>
+            band cropped away more than half of every composition. The banner is
+            given its own 3:2 so it is framed rather than cropped. */}
+      <div
+        style={cssStyle(
+          `position:relative;aspect-ratio:${wide ? "3 / 2" : "5 / 4"};overflow:hidden`
+        )}
+      >
         <TemplateArt
           id={template.id}
           alt={`${template.name} — ${template.blurb}`}
           photos={photos}
           photoIndex={photoIndex}
           dim={!live}
+          wide={wide}
         />
         {!live && <div aria-hidden style={cssStyle("position:absolute;inset:0;background:rgba(23,18,14,.42)")} />}
-        <span
-          style={cssStyle(
-            `position:absolute;left:10px;top:10px;padding:4px 10px;border-radius:999px;font-family:var(--font-ibm-plex-mono),monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;background:${
-              live ? "rgba(23,18,14,.8)" : "rgba(23,18,14,.66)"
-            };color:var(--paper)`
-          )}
-        >
-          {live ? template.price : STATUS_LABEL[template.status]}
-        </span>
         {/* the grid is mixed, so each card names its own collection */}
         {category && (
           <span
@@ -135,6 +202,37 @@ function ExperienceCard({
             {template.name}
           </span>
         </div>
+
+        {/*
+          What it costs, under the name rather than over the artwork.
+
+          It used to be a dark pill in the top-left corner of the picture, where it
+          sat on top of twelve different compositions and was legible against none
+          of them reliably — a price is the one label on a card that has to be read
+          without effort. On paper it gets a real contrast ratio and a fixed spot
+          the eye can learn, directly under the thing it prices.
+        */}
+        <span
+          style={cssStyle(
+            `align-self:flex-start;padding:3px 10px;border-radius:999px;font-family:var(--font-ibm-plex-mono),monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid ${
+              live
+                ? template.price === "Free"
+                  ? "rgba(95,128,71,.4)"
+                  : "rgba(138,58,30,.34)"
+                : "rgba(43,32,19,.2)"
+            };background:${
+              live
+                ? template.price === "Free"
+                  ? "rgba(95,128,71,.1)"
+                  : "rgba(181,80,46,.09)"
+                : "transparent"
+            };color:${
+              live ? (template.price === "Free" ? "#4a6b3a" : "var(--rust)") : "var(--ink-faint)"
+            }`
+          )}
+        >
+          {live ? template.price : STATUS_LABEL[template.status]}
+        </span>
 
         <p style={cssStyle("margin:0;font-size:13.5px;line-height:1.55;color:var(--ink-muted)")}>{template.blurb}</p>
 
@@ -316,20 +414,38 @@ export function TemplatesGallery({
           </p>
         </div>
 
+        {/* Hairlines above and below, so the row reads as a printed band on the
+            sheet rather than five objects floating on it. */}
         <div
           style={cssStyle(
-            "margin-top:36px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px"
+            "margin-top:34px;padding-top:22px;border-top:1px solid rgba(58,42,24,.14);border-bottom:1px solid rgba(58,42,24,.14);display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px"
           )}
         >
           {TRUST_BADGES.map((b) => (
+            /* A printed strip rather than five cards. Boxes around single words
+               read as a feature grid from a different product; a rule under the
+               row and ink marks above the words read as something stamped on the
+               page it is already part of. */
             <div
-              key={b.label}
+              key={b.id}
               style={cssStyle(
-                "display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:10px;background:var(--paper);border:1px solid rgba(43,38,32,.1);text-align:center"
+                "display:flex;flex-direction:column;align-items:center;gap:9px;padding:4px 8px 16px;text-align:center"
               )}
             >
-              <span style={cssStyle("font-size:20px")}>{b.icon}</span>
-              <span style={cssStyle("font-size:12.5px;font-weight:600;color:var(--ink)")}>{b.label}</span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 18 18"
+                fill="none"
+                stroke="var(--rust)"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                {b.path}
+              </svg>
+              <span style={cssStyle("font-size:12px;letter-spacing:.01em;color:var(--ink-muted)")}>{b.label}</span>
             </div>
           ))}
         </div>

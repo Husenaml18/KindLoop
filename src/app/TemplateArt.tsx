@@ -23,6 +23,12 @@ export function TemplateArt({
   /** Dimmed for experiences that aren't finished yet. */
   dim = false,
   priority = false,
+  /**
+   * The card spans two grid columns, so it needs roughly twice the pixels. Left
+   * off, Next serves the 320px source into a ~660px frame and the detail the wide
+   * artwork exists for goes soft.
+   */
+  wide = false,
 }: {
   id: string;
   alt: string;
@@ -30,6 +36,7 @@ export function TemplateArt({
   photoIndex: number;
   dim?: boolean;
   priority?: boolean;
+  wide?: boolean;
 }) {
   const art = templateImage(id);
 
@@ -48,7 +55,11 @@ export function TemplateArt({
       src={art}
       alt={alt}
       fill
-      sizes="(max-width: 640px) 92vw, (max-width: 1100px) 44vw, 320px"
+      sizes={
+        wide
+          ? "(max-width: 700px) 92vw, (max-width: 1100px) 88vw, 660px"
+          : "(max-width: 640px) 92vw, (max-width: 1100px) 44vw, 320px"
+      }
       placeholder="blur"
       priority={priority}
       style={{

@@ -22,7 +22,19 @@ async function requireOwnedOrder(orderId: string) {
 export async function simulateSuccess(orderId: string) {
   const order = await requireOwnedOrder(orderId);
   await markGiftPaid(orderId);
-  redirect(`/g/${order.gift.slug}?checkout=success`);
+
+  /* Buying one section of a website drops you back into the workbench — the
+     rest of it is still half-built and unsaved-looking, and landing on the
+     finished gift instead would read as "that's it, then". */
+  if (order.templateId) {
+    redirect(`/create/${order.gift.template}?gift=${order.gift.id}&checkout=success`);
+  }
+
+  const view =
+    order.gift.template === "personalized-website"
+      ? `/website/${order.gift.slug}`
+      : `/g/${order.gift.slug}`;
+  redirect(`${view}?checkout=success`);
 }
 
 export async function simulateCancel(orderId: string) {

@@ -6,6 +6,8 @@ import loveLetter from "@/images/love-letter.png";
 import memoryPuzzle from "@/images/memory-puzzle.png";
 import memoryverse from "@/images/memory-verse.png";
 import openWhen from "@/images/open-when.png";
+import personalizedWebsite from "@/images/Website.png";
+import redFlags from "@/images/RED-FLAGS.png";
 import mothersDayLetter from "@/images/mothers-day.png";
 import personalizedSong from "@/images/personalized-song.png";
 import surpriseRevealBox from "@/images/surprise-reveal.png";
@@ -22,7 +24,8 @@ import winYouBack from "@/images/win-you-back.png";
  * here, because a card whose picture pops in late looks broken.
  *
  * A few filenames don't match their template id (`memory-verse.png` against
- * `memoryverse`, `mothers-day.png` against `mothers-day-letter`), so the mapping is
+ * `memoryverse`, `mothers-day.png` against `mothers-day-letter`, `Website.png` against
+ * `personalized-website`, `RED-FLAGS.png` against `my-red-flags`), so the mapping is
  * explicit rather than derived from the filename. `hasTemplateImage` exists because
  * not every experience has artwork yet, and the callers fall back rather than
  * rendering an empty frame.
@@ -34,6 +37,8 @@ export const TEMPLATE_IMAGES: Record<string, StaticImageData> = {
   "memory-puzzle": memoryPuzzle,
   memoryverse: memoryverse,
   "open-when": openWhen,
+  "personalized-website": personalizedWebsite,
+  "my-red-flags": redFlags,
   "mothers-day-letter": mothersDayLetter,
   "personalized-song": personalizedSong,
   "surprise-reveal-box": surpriseRevealBox,

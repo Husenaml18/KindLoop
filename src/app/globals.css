@@ -4,6 +4,24 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * The handwriting alias.
+ *
+ * Fifteen places across seven experiences ask for `var(--hw-elegant)` and it was
+ * never defined anywhere. That is worse than it sounds: an *undefined* custom
+ * property inside a `font-family` value makes the whole declaration invalid at
+ * computed-value time, so those elements did not fall back to the next font in
+ * the stack — they dropped the declaration entirely and inherited the body sans.
+ * Every "handwritten" line in Open When, Mother's Day Letter, Countdown Gift and
+ * Win You Back has therefore been rendering in Space Grotesk.
+ *
+ * Defined here rather than edited into seven files, and given a real stack so it
+ * still degrades sensibly on a page where the Gochi face was never loaded.
+ */
+:root {
+  --hw-elegant: "Gochi Hand", "Segoe Script", "Bradley Hand", "Brush Script MT", cursive;
+}
+
 /* ------------------------------------------------------------------ */
 /* The scrollbar                                                       */
 /* ------------------------------------------------------------------ */

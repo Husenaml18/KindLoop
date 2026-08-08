@@ -48,8 +48,17 @@ export function LegalPage({
 }) {
   return (
     <PageShell>
+      {/*
+        The same column as every other page.
+
+        This used to put an 820px centred wrapper inside the shared container,
+        which pushed the left edge inward and made the policies read as narrower
+        and more cramped than About or the FAQ sitting either side of them in the
+        footer. The container is the container; only the *text* takes a reading
+        measure, exactly as it does everywhere else.
+      */}
       <PageContainer className="pb-24 pt-16">
-        <div style={{ maxWidth: 820, marginInline: "auto" }}>
+        <div>
           <p style={{ ...label, margin: 0 }}>Legal</p>
           <h1
             className="m-0 mt-4"

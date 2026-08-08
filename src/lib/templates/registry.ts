@@ -1,214 +1,60 @@
-import type { ComponentType } from "react";
-import type { z } from "zod";
+/**
+ * Every template Kindloop can make a gift from.
+ *
+ * The eleven standalone experiences live in `sections.ts`; the two *containers* —
+ * Personalized Website and Mini World — are added here, on top of them. The split
+ * is not organisational tidiness: it is what stops a container from containing
+ * itself. `sections.ts` cannot see this file, so the set both of them compose
+ * from provably excludes both of them, and the infinite regress is impossible
+ * rather than merely guarded against.
+ *
+ * The public API is unchanged: `getTemplate`, `isTemplateId`, `TemplateId` and
+ * `TEMPLATE_REGISTRY` mean what they always did, and now include the website.
+ */
+
+import { SECTION_REGISTRY, type TemplateDefinition } from "./sections";
 
 import {
-  memoryverseContentSchema,
-  emptyMemoryverseContent,
-} from "./memoryverse/schema";
-import { MemoryverseEditor } from "./memoryverse/Editor";
-import { MemoryverseView } from "./memoryverse/View";
+  personalizedWebsiteContentSchema,
+  emptyPersonalizedWebsiteContent,
+} from "./personalized-website/schema";
+import { PersonalizedWebsiteEditor } from "./personalized-website/Editor";
+import { PersonalizedWebsiteView } from "./personalized-website/View";
 
-import {
-  digitalScrapbookContentSchema,
-  emptyDigitalScrapbookContent,
-} from "./digital-scrapbook/schema";
-import { DigitalScrapbookEditor } from "./digital-scrapbook/Editor";
-import { DigitalScrapbookView } from "./digital-scrapbook/View";
+import { miniWorldContentSchema, emptyMiniWorldContent } from "./mini-world/schema";
+import { MiniWorldEditor } from "./mini-world/Editor";
+import { MiniWorldView } from "./mini-world/View";
 
-import {
-  loveLetterContentSchema,
-  emptyLoveLetterContent,
-} from "./love-letter/schema";
-import { LoveLetterEditor } from "./love-letter/Editor";
-import { LoveLetterView } from "./love-letter/View";
-
-import { openWhenContentSchema, emptyOpenWhenContent } from "./open-when/schema";
-import { OpenWhenEditor } from "./open-when/Editor";
-import { OpenWhenView } from "./open-when/View";
-
-import { countdownContentSchema, emptyCountdownContent } from "./countdown-gift/schema";
-import { CountdownGiftEditor } from "./countdown-gift/Editor";
-import { CountdownGiftView } from "./countdown-gift/View";
-
-import { memoryPuzzleContentSchema, emptyMemoryPuzzleContent } from "./memory-puzzle/schema";
-import { MemoryPuzzleEditor } from "./memory-puzzle/Editor";
-import { MemoryPuzzleView } from "./memory-puzzle/View";
-
-import { surpriseBoxContentSchema, emptySurpriseBoxContent } from "./surprise-reveal-box/schema";
-import { SurpriseBoxEditor } from "./surprise-reveal-box/Editor";
-import { SurpriseBoxView } from "./surprise-reveal-box/View";
-
-import { treasureHuntContentSchema, emptyTreasureHuntContent } from "./treasure-hunt/schema";
-import { TreasureHuntEditor } from "./treasure-hunt/Editor";
-import { TreasureHuntView } from "./treasure-hunt/View";
-
-import { mothersDayContentSchema, emptyMothersDayContent } from "./mothers-day-letter/schema";
-import { MothersDayLetterEditor } from "./mothers-day-letter/Editor";
-import { MothersDayLetterView } from "./mothers-day-letter/View";
-
-import { winYouBackContentSchema, emptyWinYouBackContent } from "./win-you-back/schema";
-import { WinYouBackEditor } from "./win-you-back/Editor";
-import { WinYouBackView } from "./win-you-back/View";
-
-export interface TemplateDefinition<TContent = unknown> {
-  id: string;
-  displayName: string;
-  description: string;
-  isPaid: boolean;
-  priceCents?: number;
-  contentSchema: z.ZodType<TContent>;
-  emptyContent: TContent;
-  Editor: ComponentType<{
-    value: TContent;
-    onChange: (value: TContent) => void;
-    uploadPhoto: (file: File) => Promise<string>;
-  }>;
-  /**
-   * `embedded` asks the view to fill its container instead of the viewport —
-   * used by editor previews and demo frames.
-   */
-  View: ComponentType<{ content: TContent; embedded?: boolean }>;
-  /**
-   * Templates whose editor owns its own preview pane (and therefore needs the
-   * whole width) opt in here; the create screen then skips its generic split.
-   */
-  fullWidthEditor?: boolean;
-  /** A public, no-signup walkthrough at /demo/<id>. */
-  hasDemo?: boolean;
-}
+export type { TemplateDefinition };
+export { SECTION_REGISTRY, getSectionTemplate } from "./sections";
 
 export const TEMPLATE_REGISTRY = {
-  memoryverse: {
-    id: "memoryverse",
-    displayName: "Memoryverse",
+  ...SECTION_REGISTRY,
+  "personalized-website": {
+    id: "personalized-website",
+    displayName: "Personalized Website",
     description:
-      "A darkened room and a slide projector. One memory fills the wall at a time, and you talk them through it.",
-    isPaid: false,
-    contentSchema: memoryverseContentSchema,
-    emptyContent: emptyMemoryverseContent,
-    Editor: MemoryverseEditor,
-    View: MemoryverseView,
-    fullWidthEditor: true,
-    hasDemo: true,
-  },
-  "digital-scrapbook": {
-    id: "digital-scrapbook",
-    displayName: "Digital Scrapbook",
-    description:
-      "A handmade book on a sunlit desk. Pages turn with weight, and things are tucked into the pockets.",
+      "Not one gift but all of them, in a running order. Their own site, opening on a title, moving through as many experiences as the story needs, and ending on a page written by you.",
     isPaid: true,
-    priceCents: 500,
-    contentSchema: digitalScrapbookContentSchema,
-    emptyContent: emptyDigitalScrapbookContent,
-    Editor: DigitalScrapbookEditor,
-    View: DigitalScrapbookView,
+    priceCents: 1500,
+    contentSchema: personalizedWebsiteContentSchema,
+    emptyContent: emptyPersonalizedWebsiteContent,
+    Editor: PersonalizedWebsiteEditor,
+    View: PersonalizedWebsiteView,
     fullWidthEditor: true,
     hasDemo: true,
   },
-  "love-letter": {
-    id: "love-letter",
-    displayName: "Love Letter",
+  "mini-world": {
+    id: "mini-world",
+    displayName: "Mini World",
     description:
-      "One sheet of stationery, sealed with wax. The ink writes itself on, one word at a time.",
-    isPaid: false,
-    contentSchema: loveLetterContentSchema,
-    emptyContent: emptyLoveLetterContent,
-    Editor: LoveLetterEditor,
-    View: LoveLetterView,
-    fullWidthEditor: true,
-    hasDemo: true,
-  },
-  "open-when": {
-    id: "open-when",
-    displayName: "Open When",
-    description:
-      "A wooden keepsake box of sealed letters. Some open now; others refuse until the day, mood or place is right.",
-    isPaid: false,
-    contentSchema: openWhenContentSchema,
-    emptyContent: emptyOpenWhenContent,
-    Editor: OpenWhenEditor,
-    View: OpenWhenView,
-    fullWidthEditor: true,
-    hasDemo: true,
-  },
-  "countdown-gift": {
-    id: "countdown-gift",
-    displayName: "Countdown Gift",
-    description:
-      "An advent calendar in gold leaf. One door a day, in order, and tomorrow's genuinely will not open early.",
-    isPaid: false,
-    contentSchema: countdownContentSchema,
-    emptyContent: emptyCountdownContent,
-    Editor: CountdownGiftEditor,
-    View: CountdownGiftView,
-    fullWidthEditor: true,
-    hasDemo: true,
-  },
-  "memory-puzzle": {
-    id: "memory-puzzle",
-    displayName: "Memory Puzzle",
-    description:
-      "A wooden puzzle tipped onto a sunlit table. The photograph only appears once they've earned it — and something unlocks along the way.",
+      "A tiny handcrafted world you can walk around. Every building holds one of the other experiences, small versions of you live in it, and something is waiting at the edge of the map.",
     isPaid: true,
-    priceCents: 500,
-    contentSchema: memoryPuzzleContentSchema,
-    emptyContent: emptyMemoryPuzzleContent,
-    Editor: MemoryPuzzleEditor,
-    View: MemoryPuzzleView,
-    fullWidthEditor: true,
-    hasDemo: true,
-  },
-  "surprise-reveal-box": {
-    id: "surprise-reveal-box",
-    displayName: "Surprise Reveal Box",
-    description:
-      "A box inside a box inside a box. Ribbon, paper, and something small in the way of each lid — then confetti, because here it's earned.",
-    isPaid: true,
-    priceCents: 500,
-    contentSchema: surpriseBoxContentSchema,
-    emptyContent: emptySurpriseBoxContent,
-    Editor: SurpriseBoxEditor,
-    View: SurpriseBoxView,
-    fullWidthEditor: true,
-    hasDemo: true,
-  },
-  "treasure-hunt": {
-    id: "treasure-hunt",
-    displayName: "Treasure Hunt",
-    description:
-      "A map that unrolls under a lantern and draws its own route. Every stop asks something small and gives back a memory; the last one opens the chest.",
-    isPaid: true,
-    priceCents: 500,
-    contentSchema: treasureHuntContentSchema,
-    emptyContent: emptyTreasureHuntContent,
-    Editor: TreasureHuntEditor,
-    View: TreasureHuntView,
-    fullWidthEditor: true,
-    hasDemo: true,
-  },
-  "mothers-day-letter": {
-    id: "mothers-day-letter",
-    displayName: "Mother's Day Letter",
-    description:
-      "Good stationery on a kitchen table in the morning. The ink arrives a word at a time, and watercolour flowers grow round the page as she reads.",
-    isPaid: false,
-    contentSchema: mothersDayContentSchema,
-    emptyContent: emptyMothersDayContent,
-    Editor: MothersDayLetterEditor,
-    View: MothersDayLetterView,
-    fullWidthEditor: true,
-    hasDemo: true,
-  },
-  "win-you-back": {
-    id: "win-you-back",
-    displayName: "Operation: Win You Back",
-    description:
-      "Six chapters of owning it — the trip-up, the replay, the things you should have done, and a plain letter at the end. Funny first, honest throughout, and it never asks to be forgiven.",
-    isPaid: false,
-    contentSchema: winYouBackContentSchema,
-    emptyContent: emptyWinYouBackContent,
-    Editor: WinYouBackEditor,
-    View: WinYouBackView,
+    priceCents: 2500,
+    contentSchema: miniWorldContentSchema,
+    emptyContent: emptyMiniWorldContent,
+    Editor: MiniWorldEditor,
+    View: MiniWorldView,
     fullWidthEditor: true,
     hasDemo: true,
   },

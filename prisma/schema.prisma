@@ -105,6 +105,13 @@ model Gift {
 model Order {
   id               String @id @default(cuid())
   giftId           String
+  /// Which experience inside a Personalized Website this paid for.
+  ///
+  /// Null for an ordinary paid gift, where the gift itself is the purchase and
+  /// `Gift.unlocked` is the whole answer. A Personalized Website can hold several paid
+  /// sections, so one gift may have several orders and each needs to say what it
+  /// bought. Additive and nullable: every existing order keeps its meaning.
+  templateId       String?
   gift             Gift   @relation(fields: [giftId], references: [id], onDelete: Cascade)
   provider         String
   status           String @default("pending")

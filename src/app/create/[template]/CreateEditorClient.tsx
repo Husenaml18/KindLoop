@@ -6,7 +6,7 @@ import { getTemplate, type TemplateId } from "@/lib/templates/registry";
 import { fraunces, ibmPlexMono, spaceGrotesk } from "@/app/fonts";
 import theme from "@/app/theme.module.css";
 import { uploadFile } from "@/lib/clientUpload";
-import { savePersonalization } from "./actions";
+import { savePersonalization, type SaveResult } from "./actions";
 import { Breadcrumbs } from "@/app/Breadcrumbs";
 
 export function CreateEditorClient({
@@ -37,10 +37,12 @@ export function CreateEditorClient({
   const [saved, setSaved] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [owed, setOwed] = useState<SaveResult["owed"]>([]);
 
   const Editor = def.Editor;
   const View = def.View;
-  const giftUrl = `/g/${slug}`;
+  /* A website gets a website's URL. Everything else keeps /g. */
+  const giftUrl = templateId === "personalized-website" ? `/website/${slug}` : `/g/${slug}`;
 
   /**
    * Uploads go to /api/upload, not through a Server Action — actions cap the
@@ -62,19 +64,23 @@ export function CreateEditorClient({
   function handleSave() {
     setSaved(false);
     startTransition(async () => {
-      await savePersonalization(giftId, content);
+      /* The save reports what is still owed rather than refusing — the draft is
+         theirs either way, and it is the share link that is gated. */
+      const result = await savePersonalization(giftId, content);
+      setOwed(result.owed);
       setSaved(true);
       router.refresh();
     });
   }
 
-  async function handleUnlock() {
+  /** Buys the gift itself, or — with a templateId — one section of a website. */
+  async function handleUnlock(sectionTemplateId?: string) {
     setCheckoutLoading(true);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ giftId }),
+        body: JSON.stringify({ giftId, templateId: sectionTemplateId }),
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
@@ -194,13 +200,50 @@ export function CreateEditorClient({
               </p>
               <button
                 type="button"
-                onClick={handleUnlock}
+                onClick={() => handleUnlock()}
                 disabled={checkoutLoading}
                 className="cursor-pointer self-start rounded-full px-5 py-2.5 text-sm font-medium disabled:opacity-50"
                 style={{ background: "var(--rust)", color: "#fdf6e8", border: "none" }}
               >
                 {checkoutLoading ? "Redirecting..." : "Unlock this template"}
               </button>
+            </div>
+          )}
+
+          {/* Everything still owing on a website, named rather than counted —
+              "you have not purchased this item" is a worse message than a list
+              with a price against each line. */}
+          {owed.length > 0 && (
+            <div
+              className="flex flex-col gap-3 rounded-xl p-4"
+              style={{ background: "var(--khaki-pale)", border: "1px solid rgba(181,80,46,.3)" }}
+            >
+              <p className="m-0 text-sm" style={{ color: "var(--ink)" }}>
+                Saved — but {owed.length === 1 ? "one section is" : `${owed.length} sections are`}{" "}
+                still locked. The link won&apos;t open for anyone until{" "}
+                {owed.length === 1 ? "it’s" : "they’re"} unlocked.
+              </p>
+              <div className="flex flex-col gap-2">
+                {owed.map((item) => {
+                  const sectionDef = getTemplate(item.templateId);
+                  return (
+                    <div key={item.templateId} className="flex flex-wrap items-center gap-3">
+                      <span className="flex-1 text-sm" style={{ color: "var(--ink)" }}>
+                        {sectionDef?.displayName ?? item.templateId}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleUnlock(item.templateId)}
+                        disabled={checkoutLoading}
+                        className="cursor-pointer rounded-full px-4 py-2 text-xs font-medium disabled:opacity-50"
+                        style={{ background: "var(--rust)", color: "#fdf6e8", border: "none" }}
+                      >
+                        Unlock — ${(item.priceCents / 100).toFixed(2)}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

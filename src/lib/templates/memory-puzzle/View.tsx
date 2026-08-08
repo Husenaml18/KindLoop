@@ -589,7 +589,15 @@ export function MemoryPuzzleView({
             role="dialog"
             aria-modal="true"
             aria-label={`Unlocked at ${shownMilestone.at} percent`}
-            onClick={() => setShownMilestone(null)}
+            /*
+             * No dismiss-on-backdrop here, deliberately.
+             *
+             * This is the one screen in the puzzle somebody earned. It arrives
+             * unannounced, mid-drag, with a hand already moving — and a stray
+             * click on the surround used to throw away the thing they had just
+             * worked for, with no way back to it. It closes on the ✕ or on "back
+             * to the puzzle", both of which are a decision rather than a twitch.
+             */
           >
             <motion.div
               className="relative my-auto w-full max-w-xl"
@@ -605,7 +613,6 @@ export function MemoryPuzzleView({
               animate={{ opacity: 1, rotateX: 0, scaleY: 1 }}
               exit={reduced ? { opacity: 0 } : { opacity: 0, rotateX: -56, scaleY: 0.5 }}
               transition={{ duration: reduced ? 0.25 : 1, ease: [0.2, 0.8, 0.2, 1] }}
-              onClick={(e) => e.stopPropagation()}
             >
               <Grain opacity={0.05} />
               <button

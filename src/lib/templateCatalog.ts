@@ -9,6 +9,8 @@
  */
 
 export type CategoryId =
+  | "flagship"
+  | "whole-story"
   | "love"
   | "celebrations"
   | "family"
@@ -26,6 +28,11 @@ export interface Category {
 }
 
 export const CATEGORIES: Category[] = [
+  /* First two on purpose. The gallery deals one card per category in turn, so a
+     collection of one lands each of these at the top of the grid — which is right,
+     because they are the only two experiences that contain the others. */
+  { id: "flagship", emoji: "🌎", label: "The flagship", blurb: "The whole catalogue, as a place you can walk around." },
+  { id: "whole-story", emoji: "✦", label: "The whole story", blurb: "Everything at once, on a site of its own." },
   { id: "love", emoji: "❤️", label: "Love", blurb: "For the person you'd choose again." },
   { id: "celebrations", emoji: "🎉", label: "Celebrations", blurb: "For the days worth making noise about." },
   { id: "family", emoji: "👨‍👩‍👧", label: "Family", blurb: "For the people who were there first." },
@@ -52,13 +59,53 @@ export interface CatalogTemplate {
   recipients: string[];
   estimate: string;
   status: "available" | "soon" | "horizon";
-  price: "Free" | "$5 once" | null;
+  price: "Free" | "$5 once" | "$15 once" | "$25 once" | null;
   href: string;
   /** A public walkthrough exists at /demo/<id>. */
   demo?: boolean;
 }
 
 export const TEMPLATE_CATALOG: CatalogTemplate[] = [
+  /* -------------------------- the flagship -------------------------- */
+  {
+    id: "mini-world",
+    name: "Mini World",
+    emoji: "🌎",
+    category: "flagship",
+    theme: "A place, not a page",
+    inspiration: "A model village under glass, with the lights left on",
+    interaction: "You don't scroll it, you walk it \u2014 every building opens a different experience, and one place on the map is hidden",
+    blurb:
+      "A tiny handcrafted world built for one person. Every building holds one of the other experiences, small versions of you live in it, and something is waiting at the edge of the map.",
+    occasions: ["Anniversary", "Proposal", "Big birthday", "Long distance"],
+    recipients: ["Partner", "Family", "Best friend"],
+    estimate: "~60 min",
+    status: "available",
+    price: "$25 once",
+    href: "/create/mini-world",
+    demo: true,
+  },
+
+  /* ------------------------ the whole story ------------------------ */
+  {
+    id: "personalized-website",
+    name: "Personalized Website",
+    emoji: "✦",
+    category: "whole-story",
+    theme: "Everything, in order",
+    inspiration: "The website someone builds by hand for one person, and nobody else ever sees",
+    interaction: "Every other experience here, arranged into one scrolling site with its own address",
+    blurb:
+      "Not one gift but as many as the story needs. Pick the pieces, put them in order, write the opening and the last page \u2014 they get a site of their own.",
+    occasions: ["Anniversary", "Proposal", "Big birthday", "Graduation"],
+    recipients: ["Partner", "Family", "Best friend"],
+    estimate: "~45 min",
+    status: "available",
+    price: "$15 once",
+    href: "/create/personalized-website",
+    demo: true,
+  },
+
   /* ---------------------------- love ---------------------------- */
   {
     id: "memoryverse",
@@ -613,18 +660,19 @@ export const TEMPLATE_CATALOG: CatalogTemplate[] = [
     id: "my-red-flags",
     name: "My Red Flags (That I'm Working On)",
     emoji: "🚩",
-    category: "horizon",
+    category: "love",
     theme: "Owning it, cheerfully",
     inspiration: "The honest list you'd read out at your own roast",
-    interaction: "Each flag flips over to what you're actually doing about it — and the joke is never on them",
+    interaction: "Every flag arrives with the work underneath it — a checklist half ticked, and a plant that grows as they read",
     blurb:
-      "A cheerfully honest list of your own worst habits, and the unglamorous work underneath each one.",
+      "A notebook of the habits you're actually working on. Not an apology, and it never asks to be forgiven — it just shows the work.",
     occasions: ["Making it up to someone", "A new relationship", "Just because"],
     recipients: ["Partner", "Best friend"],
-    estimate: "~20 min",
-    status: "horizon",
-    price: null,
-    href: "#",
+    estimate: "~25 min",
+    status: "available",
+    price: "Free",
+    href: "/create/my-red-flags",
+    demo: true,
   },
   {
     id: "family-legacy",

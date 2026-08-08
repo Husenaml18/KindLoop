@@ -22,7 +22,9 @@ export default async function MockCheckoutPage(
   });
   if (!order || order.gift.ownerId !== user.id) notFound();
 
-  const def = getTemplate(order.gift.template);
+  /* An order with a templateId bought one section of a website, not the gift —
+     naming the gift's template here would price the wrong thing. */
+  const def = getTemplate(order.templateId ?? order.gift.template);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 bg-zinc-50 px-6 py-24 dark:bg-black">

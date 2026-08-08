@@ -1,13 +1,11 @@
 "use server";
 
-import { rm } from "node:fs/promises";
-import path from "node:path";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { signOut } from "@/lib/auth";
-import { UPLOADS_ROOT } from "@/lib/uploads";
+import { deleteGiftFiles } from "@/lib/storage";
 
 /**
  * Account actions.
@@ -80,14 +78,15 @@ export async function deleteAccount(formData: FormData) {
   await signOut({ redirectTo: "/?farewell=1" });
 }
 
-/** Best-effort: a missing directory is the desired end state anyway. */
+/**
+ * Best-effort: whatever is gone is the desired end state anyway.
+ *
+ * Delegated to the storage driver so deleting an account removes the files
+ * wherever they actually live. Deleting used to reach into `uploads/` directly,
+ * which silently did nothing once files moved to blob storage — the row would
+ * vanish and the photographs would not, which is precisely the promise the
+ * privacy policy makes and the one worst to break.
+ */
 async function removeUploads(giftId: string) {
-  const dir = path.resolve(UPLOADS_ROOT, giftId);
-  /* Never let an id walk out of the uploads directory. */
-  if (dir !== UPLOADS_ROOT && !dir.startsWith(UPLOADS_ROOT + path.sep)) return;
-  try {
-    await rm(dir, { recursive: true, force: true });
-  } catch {
-    /* The row is already gone; a leftover directory is not worth failing over. */
-  }
+  await deleteGiftFiles(giftId);
 }

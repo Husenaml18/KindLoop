@@ -44,6 +44,7 @@ run before a build — see the `postinstall` script.
 |---|---|---|
 | `DATABASE_URL` | yes | — a Postgres connection string |
 | `AUTH_SECRET` | yes | generate with `npx auth secret` |
+| `BLOB_READ_WRITE_TOKEN` | in production | uploads fall back to a local `uploads/` folder |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | no | falls back to Resend, then to the terminal |
 | `AUTH_RESEND_KEY` | no | sign-in links print to the terminal |
 | `AUTH_EMAIL_FROM` | no | falls back to Resend's test sender |

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { getTemplate, isTemplateId } from "@/lib/templates/registry";
 import { generateSlug } from "@/lib/slug";
+import { unlockedTemplates } from "@/lib/entitlements";
+import { personalizedWebsiteContentSchema } from "@/lib/templates/personalized-website/schema";
 import { CreateEditorClient } from "./CreateEditorClient";
 import { AccountMenu } from "@/app/AccountMenu";
 
@@ -42,7 +44,27 @@ export default async function CreateTemplatePage(
   }
 
   const parsed = def.contentSchema.safeParse(JSON.parse(gift.content));
-  const initialContent = parsed.success ? parsed.data : def.emptyContent;
+  let initialContent = parsed.success ? parsed.data : def.emptyContent;
+
+  /*
+   * A website's lock flags are recomputed from the order rows on the way in.
+   *
+   * They are a rendering hint stored inside content the owner can edit, so they
+   * are never trusted — and refreshing them here is what makes a section stop
+   * looking locked the moment you come back from paying for it, without waiting
+   * for the next save.
+   */
+  if (template === "personalized-website") {
+    const website = personalizedWebsiteContentSchema.parse(initialContent);
+    const bought = await unlockedTemplates(gift.id);
+    initialContent = {
+      ...website,
+      sections: website.sections.map((section) => ({
+        ...section,
+        locked: Boolean(getTemplate(section.type)?.isPaid) && !bought.has(section.type),
+      })),
+    };
+  }
 
   return (
     <CreateEditorClient
