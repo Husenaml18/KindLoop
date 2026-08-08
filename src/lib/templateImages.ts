@@ -8,6 +8,7 @@ import memoryverse from "@/images/memory-verse.png";
 import openWhen from "@/images/open-when.png";
 import personalizedWebsite from "@/images/Website.png";
 import redFlags from "@/images/RED-FLAGS.png";
+import miniWorld from "@/images/mini-world.png";
 import mothersDayLetter from "@/images/mothers-day.png";
 import personalizedSong from "@/images/personalized-song.png";
 import surpriseRevealBox from "@/images/surprise-reveal.png";
@@ -39,6 +40,7 @@ export const TEMPLATE_IMAGES: Record<string, StaticImageData> = {
   "open-when": openWhen,
   "personalized-website": personalizedWebsite,
   "my-red-flags": redFlags,
+  "mini-world": miniWorld,
   "mothers-day-letter": mothersDayLetter,
   "personalized-song": personalizedSong,
   "surprise-reveal-box": surpriseRevealBox,

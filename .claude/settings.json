@@ -58,7 +58,8 @@
       "Bash(grep -oE '#[0-9a-zA-Z]{2,9}\\\\b' src/lib/templates/mini-world/theme.ts)",
       "Bash(grep -vE '^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{8}$')",
       "Bash(curl -s -o /dev/null -w \"/templates: %{http_code}\\\\n\" http://localhost:3000/templates)",
-      "Bash(curl -s -o /dev/null -w \"/demo: %{http_code}\\\\n\" http://localhost:3000/demo)"
+      "Bash(curl -s -o /dev/null -w \"/demo: %{http_code}\\\\n\" http://localhost:3000/demo)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('stripe:', p.dependencies.stripe\\)\")"
     ]
   }
 }

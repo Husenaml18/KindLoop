@@ -103,10 +103,10 @@ const STATUS_RANK: Record<CatalogTemplate["status"], number> = {
  * crops the sides — which on both of these means losing the title off the left
  * edge of their own picture.
  */
-const WIDE_ART = new Set(["personalized-website", "my-red-flags"]);
+const WIDE_ART = new Set(["personalized-website", "my-red-flags", "mini-world"]);
 
 /** The one card that also takes two columns. See `.wideCard`. */
-const HERO_ID = "personalized-website";
+const HERO_ID = "mini-world";
 
 const CATEGORY_BY_ID = new Map(CATEGORIES.map((c) => [c.id, c]));
 const CATEGORY_ORDER = new Map(CATEGORIES.map((c, i) => [c.id, i]));
