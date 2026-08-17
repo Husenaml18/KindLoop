@@ -97,7 +97,9 @@ export function MiniWorldView({
         {phase !== "exploring" && phase !== "ending" && (
           <motion.div
             key="gate"
-            className="absolute inset-0 grid place-items-center px-6 text-center"
+            /* Above the world, like every other overlay here — the district sheet
+               and the secret are z-40, the ending z-50. */
+            className="absolute inset-0 z-50 grid place-items-center px-6 text-center"
             style={{
               background:
                 phase === "asleep"

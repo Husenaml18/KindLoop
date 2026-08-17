@@ -97,7 +97,7 @@ export function LoveLetterView({
   const paperStyle = PAPER_STYLES[content.paperStyle];
   const paperHex = PAPER_COLORS[content.paperColor].hex;
   const hand = HANDS[content.hand];
-  const inkPair = inkFor(content.ink, paperStyle);
+  const inkPair = inkFor(content.ink, paperStyle, paperHex);
   const scent = SCENTS[content.scent];
   const seal = SEAL_COLORS[content.sealColor];
 

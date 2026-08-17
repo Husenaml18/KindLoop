@@ -340,7 +340,7 @@ function LetterReader({
   const paperStyle = PAPER_STYLES[letter.paperStyle];
   const paperHex = PAPER_COLORS[letter.paperColor].hex;
   const hand = HANDS[letter.hand];
-  const inkPair = inkFor(letter.ink, paperStyle);
+  const inkPair = inkFor(letter.ink, paperStyle, paperHex);
   const seal = SEAL_COLORS[letter.sealColor];
 
   const greeting = letter.greeting || OW_FALLBACKS.greeting;

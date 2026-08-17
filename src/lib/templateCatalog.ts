@@ -106,6 +106,26 @@ export const TEMPLATE_CATALOG: CatalogTemplate[] = [
     demo: true,
   },
 
+  /* ------------------------- celebrations ------------------------- */
+  {
+    id: "birthday-card",
+    name: "Interactive Birthday Card",
+    emoji: "🎂",
+    category: "celebrations",
+    theme: "A card that opens",
+    inspiration: "A handmade card made at the kitchen table with the good scissors",
+    interaction: "The card physically unfolds, and you hold your breath against the screen to blow the candles out",
+    blurb:
+      "A handmade card that actually opens. An envelope on one page with a letter inside, a cake on the other \u2014 and you have to hold your breath to blow the candles out.",
+    occasions: ["Birthday", "Milestone birthday", "Just because"],
+    recipients: ["Partner", "Best friend", "Family", "Anyone"],
+    estimate: "~15 min",
+    status: "available",
+    price: "Free",
+    href: "/create/birthday-card",
+    demo: true,
+  },
+
   /* ---------------------------- love ---------------------------- */
   {
     id: "memoryverse",

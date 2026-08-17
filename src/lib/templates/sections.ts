@@ -62,6 +62,10 @@ import { redFlagsContentSchema, emptyRedFlagsContent } from "./red-flags/schema"
 import { RedFlagsEditor } from "./red-flags/Editor";
 import { RedFlagsView } from "./red-flags/View";
 
+import { birthdayCardContentSchema, emptyBirthdayCardContent } from "./birthday-card/schema";
+import { BirthdayCardEditor } from "./birthday-card/Editor";
+import { BirthdayCardView } from "./birthday-card/View";
+
 export interface TemplateDefinition<TContent = unknown> {
   id: string;
   displayName: string;
@@ -221,6 +225,19 @@ export const SECTION_REGISTRY = {
     emptyContent: emptyWinYouBackContent,
     Editor: WinYouBackEditor,
     View: WinYouBackView,
+    fullWidthEditor: true,
+    hasDemo: true,
+  },
+  "birthday-card": {
+    id: "birthday-card",
+    displayName: "Interactive Birthday Card",
+    description:
+      "A handmade card that actually opens. Inside: an envelope with a letter tucked in it, and a cake you blow the candles out on by holding your breath against the screen.",
+    isPaid: false,
+    contentSchema: birthdayCardContentSchema,
+    emptyContent: emptyBirthdayCardContent,
+    Editor: BirthdayCardEditor,
+    View: BirthdayCardView,
     fullWidthEditor: true,
     hasDemo: true,
   },

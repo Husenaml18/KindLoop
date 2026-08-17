@@ -75,7 +75,17 @@ export function WorldStage({
     <div
       ref={stageRef}
       className="absolute inset-0 overflow-hidden"
-      style={{ background: world.sky }}
+      /*
+        `isolation: isolate` makes this a stacking context, which keeps the
+        buildings (z 10–12), the secret place (z 9) and the wandering characters
+        (z 20) *inside* the world. Without it those escaped into the page's own
+        stacking context and painted over the arrival gate, which has no z-index —
+        so the world showed through the welcome screen with houses on top of the
+        subtitle. The camera wrapper looks like it should contain them, but framer
+        emits no transform at rest, so it forms no stacking context when the world
+        is sitting still. This does not depend on that.
+      */
+      style={{ background: world.sky, isolation: "isolate" }}
       onPointerMove={(e) => {
         if (reduced || !interactive || focus) return;
         const r = stageRef.current?.getBoundingClientRect();

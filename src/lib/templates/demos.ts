@@ -9,6 +9,7 @@ import { treasureHuntDemo } from "./treasure-hunt/demo";
 import { mothersDayLetterDemo } from "./mothers-day-letter/demo";
 import { winYouBackDemo } from "./win-you-back/demo";
 import { redFlagsDemo } from "./red-flags/demo";
+import { birthdayCardDemo } from "./birthday-card/demo";
 import { personalizedWebsiteDemo } from "./personalized-website/demo";
 import { miniWorldDemo } from "./mini-world/demo";
 
@@ -29,6 +30,7 @@ export const TEMPLATE_DEMOS: Record<string, unknown> = {
   "mothers-day-letter": mothersDayLetterDemo,
   "win-you-back": winYouBackDemo,
   "my-red-flags": redFlagsDemo,
+  "birthday-card": birthdayCardDemo,
   /* Composed from the entries above rather than from samples of its own — see
      its `demo.ts` for why. */
   "personalized-website": personalizedWebsiteDemo,

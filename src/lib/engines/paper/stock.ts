@@ -222,10 +222,46 @@ export const INKS: Record<InkId, { label: string; hex: string; wet: string }> = 
   sepia: { label: "Sepia", hex: "#6b4a2a", wet: "#8a6339" },
 };
 
-/** Ink on dark stationery needs to invert or it simply disappears. */
-export function inkFor(inkId: InkId, paperStyle: PaperStyle): { hex: string; wet: string } {
-  if (!paperStyle.dark) return INKS[inkId];
-  return { hex: "#eee4cf", wet: "#fff6e4" };
+/** sRGB relative luminance, per WCAG. 0 is black, 1 is white. */
+function luminance(hex: string): number {
+  const n = parseInt(hex.slice(1), 16);
+  const channel = (c: number) => {
+    const v = c / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  };
+  return (
+    0.2126 * channel((n >> 16) & 255) +
+    0.7152 * channel((n >> 8) & 255) +
+    0.0722 * channel(n & 255)
+  );
+}
+
+/**
+ * Ink on dark stationery needs to invert or it simply disappears.
+ *
+ * Decided from the luminance of the sheet that actually gets painted, not from
+ * `paperStyle.dark`. That flag is a *promise* a style makes about the ground it
+ * lays down, and `darkElegant` does not keep it: its overlay is a faint light
+ * radial, so the sheet ends up whatever `paperColor` says. Worse, not one of the
+ * nine paper colours is dark — the lightest is 0.955 and the darkest 0.771 — so
+ * the flag could never be correct with this palette. Measured against every
+ * colour in the set, the inverted cream ink scored between 1.01:1 and 1.21:1,
+ * which is invisible, while the intended ink scored 10:1 or better.
+ *
+ * That combination was reachable in the editor as well as in the demo, so a
+ * person could write a whole letter nobody could read.
+ *
+ * A style that genuinely paints a dark ground still inverts correctly, because a
+ * dark ground means a dark base colour and this reads the base colour.
+ */
+export function inkFor(
+  inkId: InkId,
+  paperStyle: PaperStyle,
+  /** The sheet's own colour. Omitted, the old flag is used as a fallback. */
+  paperHex?: string
+): { hex: string; wet: string } {
+  const dark = paperHex ? luminance(paperHex) < 0.4 : paperStyle.dark;
+  return dark ? { hex: "#eee4cf", wet: "#fff6e4" } : INKS[inkId];
 }
 
 /* --------------------------- scent particles --------------------------- */
